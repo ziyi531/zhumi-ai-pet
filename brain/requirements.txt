@@ -1,0 +1,7 @@
+fastapi>=0.100
+uvicorn>=0.23
+apscheduler>=3.10,<4
+requests>=2.31
+ddgs>=9.16       # 联网搜索（websearch.py），只发搜索词；不装也能跑，只是不能上网查
+lunardate>=0.3   # 农历节日换算（toolbox.date_calc）；GPL-3.0，个人自用没问题，要分发得换掉
+av>=14          # Opus 编解码（ESP32 的录音和声音），自带 libopus

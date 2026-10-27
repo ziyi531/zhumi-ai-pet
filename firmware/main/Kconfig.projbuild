@@ -1,0 +1,100 @@
+menu "AI Pet"
+
+config PET_WIFI_SSID
+    string "WiFi SSID"
+    default ""
+    help
+        先写死在配置里，以后再做配网页面。
+
+config PET_WIFI_PASSWORD
+    string "WiFi Password"
+    default ""
+
+config PET_WIFI2_SSID
+    string "第二个 WiFi（手机热点，出门用）"
+    default ""
+    help
+        开机扫一遍周围，家里的和这个哪个在就连哪个（都在时连家里的）；连着的不见了会重新扫、换另一个。
+        连这个时直接走服务器中转（手机热点连不到家里的局域网）。热点要开 2.4GHz（很多手机默认 5GHz）。
+
+config PET_WIFI2_PASSWORD
+    string "第二个 WiFi 的密码"
+    default ""
+
+config PET_SERVER_URL
+    string "PC 大脑地址（WebSocket，家里局域网）"
+    default "ws://192.168.1.100:8600/ws"
+
+config PET_SERVER_URL_REMOTE
+    string "出门在外连大脑的地址（经服务器中转，wss）"
+    default ""
+    help
+        局域网地址连不上（比如连着手机热点）就自动改连这个；空着就只连局域网。
+        两个地址都要写明端口（wss 写 :443）：切换地址用 esp_websocket_client_set_uri，
+        新地址不带端口时它会沿用上一个地址的端口（真机踩过：去连了 your-domain.example:8600）。
+
+config PET_DEVICE_TOKEN
+    string "设备密钥（和大脑 data/device_token.txt 一致）"
+    default ""
+    help
+        经公网中转连大脑时必须带；局域网里不检查。
+
+endmenu
+
+# ---- 以下是小智语音模块用到的开关，名字保持和小智一致，代码就不用改 ----
+menu "Audio (from xiaozhi)"
+
+config USE_AUDIO_PROCESSOR
+    bool "Enable AFE audio processing (AEC + VAD)"
+    default y
+
+config USE_DEVICE_AEC
+    bool "Enable device-side AEC (lets you interrupt while it is talking)"
+    default y
+    depends on USE_AUDIO_PROCESSOR
+
+config USE_AFE_WAKE_WORD
+    bool "Wake word via AFE (WakeNet)"
+    default y
+
+config USE_SERVER_AEC
+    bool
+    default n
+
+config USE_ESP_WAKE_WORD
+    bool
+    default n
+
+config USE_CUSTOM_WAKE_WORD
+    bool
+    default n
+
+config CUSTOM_WAKE_WORD
+    string "自定义唤醒词（拼音，音节之间空格）"
+    default "zhu mi zhu mi"
+    help
+        模型分区里有中文 MultiNet 模型（ESP Speech Recognition -> mn7_cn）时用它当唤醒词，代替“你好小智”。
+
+config CUSTOM_WAKE_WORD_DISPLAY
+    string "自定义唤醒词（中文，日志里显示）"
+    default "猪咪猪咪"
+
+config CUSTOM_WAKE_WORD_THRESHOLD
+    int "唤醒灵敏度阈值（百分比，越低越容易唤醒、也越容易误触发）"
+    default 20
+    range 5 90
+
+config SEND_WAKE_WORD_DATA
+    bool
+    default n
+
+config USE_AUDIO_DEBUGGER
+    bool "Enable audio debugger (UDP)"
+    default n
+
+config AUDIO_DEBUG_UDP_SERVER
+    string "Audio debugger UDP server"
+    default "192.168.1.100:8000"
+    depends on USE_AUDIO_DEBUGGER
+
+endmenu

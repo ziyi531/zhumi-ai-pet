@@ -1,0 +1,21 @@
+{
+ "voice": "ruanmeng",
+ "gpu_idle_mb": 4989,
+ "gpu_llm_mb": 4987,
+ "llm_tok_s_alone": 54.7,
+ "llm_reply_s_alone": 2.34,
+ "tts_load_s": 6.0,
+ "tts_warmup_s": 1.9,
+ "gpu_llm_tts_mb": 7863,
+ "tts_first_audio_s": [
+  0.41,
+  0.41,
+  0.38,
+  0.45
+ ],
+ "tts_rtf": 0.5,
+ "gpu_peak_mb": 7862,
+ "llm_tok_s_with_tts": 54.3,
+ "llm_reply_s_with_tts": 2.68,
+ "gpu_total_mb": 8187
+}

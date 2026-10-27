@@ -1,0 +1,15 @@
+# personal data and machine-specific settings
+brain/data/
+brain/local_settings.py
+*.pem
+*.key
+firmware/sdkconfig
+firmware/sdkconfig.old
+
+# models, environments, build outputs
+brain/models/
+brain/.venv*/
+__pycache__/
+*.pyc
+firmware/build/
+firmware/managed_components/

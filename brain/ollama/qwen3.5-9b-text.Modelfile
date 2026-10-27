@@ -1,0 +1,14 @@
+# 团子的大脑：qwen3.5:9b 的纯文字版（不带视觉模块）。
+# 8GB 显卡上要和声音服务（约 2.5GB）挤在一起，视觉模块的计算缓冲（约 250MB）省下来给声音服务；
+# 以后真要用摄像头看东西，再换回 qwen3.5:9b。
+# 生成：ollama create qwen3.5:9b-text -f ollama\qwen3.5-9b-text.Modelfile
+# FROM 的路径是 `ollama show --modelfile qwen3.5:9b` 里的第一个 FROM（主模型），第二个 FROM 是视觉模块，不要。
+FROM C:\Users\76012\.ollama\models\blobs\sha256-02d45dc1cf451ba2475ac33b301c2dd8f985abe4c182ce04a1f2f5bf0260278d
+TEMPLATE {{ .Prompt }}
+RENDERER qwen3.5
+PARSER qwen3.5
+# Qwen3.5 官方给不思考模式（instruct）的推荐采样参数；temperature 每次请求还会再指定
+PARAMETER temperature 0.7
+PARAMETER top_p 0.8
+PARAMETER top_k 20
+PARAMETER presence_penalty 1.5

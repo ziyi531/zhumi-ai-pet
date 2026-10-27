@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>团子表情预览</title>
+<style>
+  :root { --bg:#f6f3ee; --panel:#ffffff; --line:#e4ddd2; --fg:#2b2622; --dim:#8a8178; --accent:#e8789a; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#16171a; --panel:#1f2125; --line:#33363c; --fg:#ece8e2; --dim:#9a958e; --accent:#f08fae; }
+  }
+  :root[data-theme="dark"] { --bg:#16171a; --panel:#1f2125; --line:#33363c; --fg:#ece8e2; --dim:#9a958e; --accent:#f08fae; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 system-ui, "Microsoft YaHei", sans-serif; }
+  main { max-width:1100px; margin:0 auto; padding:20px 16px 40px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--dim); margin:0 0 16px; }
+  .styles { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-bottom:18px; }
+  .style-btn { text-align:left; padding:12px 14px; border-radius:14px; border:2px solid var(--line); background:var(--panel); color:var(--fg); cursor:pointer; font:inherit; }
+  .style-btn b { display:block; font-size:15px; }
+  .style-btn span { color:var(--dim); font-size:12px; }
+  .style-btn.on { border-color:var(--accent); }
+  .stage { display:grid; grid-template-columns:minmax(0, 660px) minmax(0, 1fr); gap:20px; align-items:start; }
+  @media (max-width:900px) { .stage { grid-template-columns:1fr; } }
+  /* 模拟立创成品机的外壳：屏幕左边是摄像头 */
+  .shell { background:#f3efe7; border-radius:30px; padding:22px 26px 22px 54px; position:relative;
+           box-shadow:inset 0 -4px 0 #ddd6ca, 0 10px 30px #0002; }
+  .shell::before { content:""; position:absolute; left:20px; top:50%; width:16px; height:16px; margin-top:-8px; border-radius:50%;
+                   background:radial-gradient(circle at 35% 35%, #556 0 20%, #111 45%, #222 100%); box-shadow:0 0 0 3px #ddd6ca; }
+  .screen { display:block; width:100%; aspect-ratio:4/3; border-radius:10px; background:#000; cursor:pointer; box-shadow:0 0 0 6px #1b1b1d; }
+  .hint { color:var(--dim); font-size:12px; margin:10px 2px 0; }
+  .faces { display:flex; flex-wrap:wrap; gap:6px; }
+  .faces button { padding:7px 12px; border-radius:999px; border:1px solid var(--line); background:var(--panel); color:var(--fg); cursor:pointer; font:inherit; }
+  .faces button.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  label.chk { display:flex; gap:6px; align-items:center; color:var(--dim); margin:12px 0; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; }
+  .card h2 { font-size:13px; color:var(--dim); margin:0 0 10px; font-weight:600; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:12px; margin-top:22px; }
+  .thumb { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:8px; cursor:pointer; }
+  .thumb canvas { display:block; width:100%; aspect-ratio:4/3; border-radius:6px; }
+  .thumb div { text-align:center; font-size:12px; color:var(--dim); margin-top:6px; }
+  .note { font-size:13px; color:var(--dim); }
+  .note b { color:var(--fg); }
+</style>
+</head>
+<body>
+<main>
+  <h1>团子表情预览 · 320×240</h1>
+  <p class="sub">按立创成品机的 2.0 寸屏比例绘制。先选一种风格，再点表情看效果；点屏幕等于摸摸头。</p>
+
+  <div class="styles" id="styles"></div>
+
+  <div class="stage">
+    <div>
+      <div class="shell"><canvas class="screen" id="main"></canvas></div>
+      <p class="hint">屏幕左边的小圆点是摄像头的位置。表情切换时会平滑过渡，待机时会自己眨眼、东张西望。</p>
+    </div>
+    <div>
+      <div class="card">
+        <h2>表情</h2>
+        <div class="faces" id="faceBtns"></div>
+        <label class="chk"><input type="checkbox" id="auto"> 自动轮播所有表情</label>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <h2>这种风格</h2>
+        <p class="note" id="styleNote"></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid" id="grid"></div>
+</main>
+
+<script src="face_engine.js"></script>
+<script>
+// ================= 页面 =================
+const dpr = Math.min(2, window.devicePixelRatio || 1);
+const store = { get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+let style = STYLES[store.get('pet-face-style')] ? store.get('pet-face-style') : 'dango';
+
+const main = document.getElementById('main');
+main.width = 640 * dpr; main.height = 480 * dpr;
+const mctx = main.getContext('2d');
+const mainSt = newState('idle');
+let chosen = 'idle';
+const hearts = [];
+
+// 风格按钮
+const stylesEl = document.getElementById('styles');
+for (const [key, s] of Object.entries(STYLES)) {
+  const b = document.createElement('button');
+  b.className = 'style-btn'; b.dataset.key = key;
+  const name = document.createElement('b'); name.textContent = s.name;
+  const desc = document.createElement('span'); desc.textContent = s.desc;
+  b.append(name, desc);
+  b.onclick = () => { style = key; store.set('pet-face-style', key); syncUI(); };
+  stylesEl.append(b);
+}
+// 表情按钮
+const faceBtns = document.getElementById('faceBtns');
+for (const [key, label] of FACE_LIST) {
+  const b = document.createElement('button');
+  b.textContent = label; b.dataset.key = key;
+  b.onclick = () => { document.getElementById('auto').checked = false; pick(key); };
+  faceBtns.append(b);
+}
+function pick(key) { chosen = key; setFace(mainSt, key); syncUI(); }
+function syncUI() {
+  stylesEl.querySelectorAll('.style-btn').forEach(b => b.classList.toggle('on', b.dataset.key === style));
+  faceBtns.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.key === chosen));
+  document.getElementById('styleNote').innerHTML = STYLES[style].note;
+}
+
+// 缩略图：每个表情一个小屏
+const grid = document.getElementById('grid');
+const thumbs = FACE_LIST.map(([key, label]) => {
+  const box = document.createElement('div'); box.className = 'thumb';
+  const cv = document.createElement('canvas'); cv.width = 320 * dpr; cv.height = 240 * dpr;
+  const cap = document.createElement('div'); cap.textContent = label;
+  box.append(cv, cap); grid.append(box);
+  box.onclick = () => { document.getElementById('auto').checked = false; pick(key); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+  return { key, ctx: cv.getContext('2d'), st: newState(key) };
+});
+
+// 摸摸头：短暂开心，冒小爱心
+main.addEventListener('click', ev => {
+  const r = main.getBoundingClientRect();
+  hearts.push({ x: (ev.clientX - r.left) / r.width * 320, y: (ev.clientY - r.top) / r.height * 240, t: performance.now() });
+  if (hearts.length > 12) hearts.shift();
+  mainSt.override = mainSt.face === 'sleep' ? 'sleepy' : 'happy';
+  setFace(mainSt, mainSt.override); mainSt.overrideUntil = performance.now() + 1500;
+});
+
+let autoNext = 0, frame = 0;
+function loop(t) {
+  if (mainSt.override && t > mainSt.overrideUntil) { mainSt.override = null; setFace(mainSt, chosen); }
+  if (document.getElementById('auto').checked && t > autoNext) {
+    const i = (FACE_LIST.findIndex(f => f[0] === chosen) + 1) % FACE_LIST.length;
+    pick(FACE_LIST[i][0]); autoNext = t + 2600;
+  }
+  const S = STYLES[style];
+  mctx.setTransform(2 * dpr, 0, 0, 2 * dpr, 0, 0);
+  S.draw(mctx, mainSt.p, step(mainSt, t));
+  mctx.setTransform(2 * dpr, 0, 0, 2 * dpr, 0, 0);
+  drawHearts(mctx, hearts, t, (S.c && S.c.heart) || '#26301a');
+  if (frame++ % 2 === 0) {
+    for (const th of thumbs) {
+      if (th.st.p.peek && t - th.st.start > 4000) setFace(th.st, 'peek');  // 探头缩略图循环播放
+      th.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      S.draw(th.ctx, th.st.p, step(th.st, t));
+    }
+  }
+  requestAnimationFrame(loop);
+}
+syncUI();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

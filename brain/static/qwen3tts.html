@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>团子新声音试听</title>
+<style>
+  :root { --bg:#f3efe7; --panel:#fffdf9; --line:#e6dfd3; --fg:#2b2622; --dim:#8a8178; --accent:#e8789a; --soft:#fbe9ef; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#17181b; --panel:#212328; --line:#34373d; --fg:#ece8e2; --dim:#9a958e; --accent:#f08fae; --soft:#3a2a31; }
+  }
+  :root[data-theme="dark"] { --bg:#17181b; --panel:#212328; --line:#34373d; --fg:#ece8e2; --dim:#9a958e; --accent:#f08fae; --soft:#3a2a31; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.55 system-ui, "Microsoft YaHei", sans-serif; }
+  main { max-width:960px; margin:0 auto; padding:24px 16px 48px; }
+  h1 { font-size:20px; margin:0 0 4px; }
+  .sub { color:var(--dim); margin:0 0 18px; font-size:13px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:14px; }
+  .card.liked { border-color:var(--accent); box-shadow:0 0 0 2px var(--soft); }
+  .perf { display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:8px; font-size:13px; }
+  .perf div { background:var(--soft); border-radius:10px; padding:8px 10px; }
+  .perf b { display:block; font-size:16px; }
+  .head { display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .head h2 { margin:0; font-size:17px; flex:1; }
+  .desc { color:var(--dim); font-size:13px; margin:4px 0 10px; }
+  .lines { display:flex; flex-direction:column; gap:6px; }
+  .line { display:flex; align-items:center; gap:10px; padding:6px 8px; border-radius:10px; }
+  .line.playing { background:var(--soft); }
+  .line .t { flex:1; }
+  .mood { font-size:11px; padding:2px 8px; border-radius:999px; background:var(--soft); color:var(--accent); flex:none; }
+  .meta { font-size:11px; color:var(--dim); flex:none; }
+  .play { width:32px; height:32px; border-radius:50%; border:0; background:var(--accent); color:#fff; cursor:pointer; font-size:13px; flex:none; }
+  button.act { padding:6px 12px; border-radius:10px; border:1px solid var(--line); background:var(--panel); color:var(--fg); cursor:pointer; font:inherit; font-size:13px; }
+  button.act.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  details { margin-top:10px; font-size:13px; }
+  summary { cursor:pointer; color:var(--dim); }
+  .empty { color:var(--dim); text-align:center; padding:30px; }
+  h3.batch { font-size:14px; color:var(--dim); margin:22px 4px 10px; font-weight:600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>团子的新声音 · Qwen3-TTS 试听</h1>
+  <p class="sub">全部在你的电脑上本地合成。每种声音都是用一段文字描述“捏”出来的，不模仿任何真人。先用描述加情绪生成几段参考音，日常说话再用小模型照着参考音合成，以后接进团子也是这条路。每句台词按团子当时的情绪选用对应的参考音。</p>
+
+  <div class="card" id="perfCard" hidden>
+    <div class="perf" id="perf"></div>
+  </div>
+
+  <div id="list"></div>
+  <p class="empty" id="empty" hidden>还没有生成试听音频（运行 tools/qwen3tts_trial.py）。</p>
+</main>
+
+<script>
+const MOOD = { normal: '平常', happy: '开心', pout: '傲娇', sad: '委屈', sleepy: '犯困' };
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+};
+const $ = id => document.getElementById(id);
+const audio = new Audio();
+let current = null, queue = null;
+let liked = new Set(store.get('qwen3tts-liked', []));
+
+function play(file, row) {
+  return new Promise(resolve => {
+    if (current) current.classList.remove('playing');
+    current = row; if (row) row.classList.add('playing');
+    audio.src = `/static/qwen3tts/${file}?v=${Date.now() >> 16}`;
+    const done = () => { if (row) row.classList.remove('playing'); audio.onended = audio.onerror = null; resolve(); };
+    audio.onended = done; audio.onerror = done;
+    audio.play().catch(done);
+  });
+}
+
+function row(item, extra) {
+  const el = document.createElement('div');
+  el.className = 'line';
+  el.innerHTML = `<button class="play" title="播放">▶</button><span class="mood"></span><span class="t"></span><span class="meta"></span>`;
+  el.querySelector('.mood').textContent = MOOD[item.mood] || item.mood;
+  el.querySelector('.t').textContent = item.text;
+  el.querySelector('.meta').textContent = extra || '';
+  el.querySelector('.play').onclick = () => { queue = null; play(item.file, el); };
+  return el;
+}
+
+function perfBox(p, b) {
+  const mb = v => v == null ? '—' : (v / 1024).toFixed(1) + ' GB';
+  const avg = a => a && a.length ? (a.reduce((x, y) => x + y, 0) / a.length).toFixed(2) : '—';
+  // b：tools/qwen3tts_bench.py 的结果（加速版，和 Ollama 大脑同时在显卡上）
+  const cells = b ? [
+    ['显卡占用（大脑 + 声音）', `${mb(b.gpu_peak_mb)} / ${mb(b.gpu_total_mb)}`, `只有大脑时 ${mb(b.gpu_llm_mb)}`],
+    ['团子开口要等', `${avg(b.tts_first_audio_s)} 秒`, '从拿到回复文字到出第一段声音'],
+    ['合成速度', `RTF ${b.tts_rtf}`, 'RTF < 1 表示比说话还快，可以边合成边播'],
+    ['大脑生成速度', `${b.llm_tok_s_with_tts ?? '—'} token/秒`, `没加载声音时 ${b.llm_tok_s_alone ?? '—'}，降了就说明显存不够`],
+  ] : [
+    ['日常合成（0.6B）显存', mb(p.clone_torch_peak_mb), '模型本身峰值，不含 Ollama'],
+    ['日常合成速度', p.clone_rtf == null ? '—' : `RTF ${p.clone_rtf}`, `平均一句 ${p.clone_avg_line_s ?? '—'} 秒（未加速）`],
+    ['捏声音（1.7B）显存', mb(p.design_torch_peak_mb), '只在设计声音时用一次'],
+    ['捏声音速度', p.design_rtf == null ? '—' : `RTF ${p.design_rtf}`, 'RTF < 1 表示比实时快'],
+  ];
+  $('perf').innerHTML = '';
+  for (const [k, v, n] of cells) {
+    const d = document.createElement('div');
+    d.innerHTML = `<span></span><b></b><span class="meta"></span>`;
+    d.children[0].textContent = k; d.children[1].textContent = v; d.children[2].textContent = n;
+    $('perf').append(d);
+  }
+  $('perfCard').hidden = false;
+}
+
+(async () => {
+  let m;
+  try { m = await (await fetch('/static/qwen3tts/manifest.json?' + Date.now())).json(); } catch (e) { $('empty').hidden = false; return; }
+  let bench = null;
+  try { const r = await fetch('/static/qwen3tts/bench.json?' + Date.now()); if (r.ok) bench = await r.json(); } catch (e) {}
+  if (m.perf || bench) perfBox(m.perf || {}, bench);
+  let lastBatch = null;
+  for (const vid of m.order || Object.keys(m.voices)) {
+    const v = m.voices[vid];
+    if (v.batch && v.batch !== lastBatch) {
+      const h = document.createElement('h3');
+      h.className = 'batch'; h.textContent = v.batch;
+      $('list').append(h);
+      lastBatch = v.batch;
+    }
+    const card = document.createElement('div');
+    card.className = 'card' + (liked.has(vid) ? ' liked' : '');
+    card.innerHTML = `<div class="head"><h2></h2><button class="act all">▶ 依次播放</button><button class="act like">☆ 喜欢</button></div>
+      <p class="desc"></p><div class="lines"></div>
+      <details><summary>捏出来的参考音（每种情绪一段）</summary><div class="lines refs"></div></details>`;
+    card.querySelector('h2').textContent = v.name;
+    const rates = v.lines.map(it => it.rate).filter(Boolean).sort((a, b) => a - b);
+    const median = rates.length ? rates[Math.floor(rates.length / 2)] : null;
+    card.querySelector('.desc').textContent = (v.batch && v.batch.startsWith('第三批') ? '做法：' : '声音描述：') + v.desc
+      + (median ? `　语速中位数 ${median} 字/秒` : '');
+    const lines = card.querySelector('.lines');
+    const rows = v.lines.map(it => {
+      const r = row(it, it.rate ? `${it.sec}s · ${it.rate} 字/秒` : `${it.sec}s`);
+      lines.append(r); return [it, r];
+    });
+    for (const it of v.refs) card.querySelector('.refs').append(row(it, it.tone));
+    const like = card.querySelector('.like');
+    const paint = () => { const on = liked.has(vid); like.classList.toggle('on', on); like.textContent = on ? '★ 喜欢' : '☆ 喜欢'; card.classList.toggle('liked', on); };
+    paint();
+    like.onclick = () => { liked.has(vid) ? liked.delete(vid) : liked.add(vid); store.set('qwen3tts-liked', [...liked]); paint(); };
+    card.querySelector('.all').onclick = async () => {
+      queue = rows.slice();
+      while (queue && queue.length) {
+        const [it, r] = queue.shift();
+        r.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        await play(it.file, r);
+        await new Promise(res => setTimeout(res, 350));
+      }
+    };
+    $('list').append(card);
+  }
+})();
+</script>
+</body>
+</html>

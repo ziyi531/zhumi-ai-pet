@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>团子假设备</title>
+<style>
+  :root { --bg:#14161a; --panel:#1d2026; --line:#2c3038; --fg:#e6e8eb; --dim:#8b919c; --accent:#7fd4ff; --warn:#ffb86b; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.5 system-ui, "Microsoft YaHei", sans-serif; }
+  main { display:grid; grid-template-columns:minmax(0,560px) minmax(0,1fr); gap:20px; padding:20px; max-width:1200px; margin:0 auto; }
+  @media (max-width:900px) { main { grid-template-columns:1fr; padding:16px; } }
+  h2 { font-size:13px; color:var(--dim); font-weight:600; margin:16px 0 6px; letter-spacing:.05em; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; }
+  /* 设备本体 */
+  .shell { background:#2a2d33; border-radius:28px; padding:22px; box-shadow:inset 0 2px 0 #3a3e46, 0 8px 24px #0006; }
+  .oled { width:100%; aspect-ratio:2/1; background:#000; border-radius:6px; image-rendering:pixelated; display:block; cursor:pointer; }
+  .shell.vibe-tap   { animation:shake .08s linear 2; }
+  .shell.vibe-purr  { animation:shake .12s linear 4; }
+  .shell.vibe-nudge { animation:shake .1s linear 8; }
+  @keyframes shake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-2px,1px)} 75%{transform:translate(2px,-1px)} }
+  .led { display:flex; justify-content:space-between; color:var(--dim); font-size:12px; margin-top:10px; }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:#555; margin-right:6px; vertical-align:middle; }
+  .dot.on { background:#5fdc8a; }
+  .bubble { min-height:48px; margin-top:14px; padding:10px 14px; border-radius:12px; background:#262a31; color:var(--fg); }
+  .bubble.empty { color:var(--dim); }
+  .row { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+  input[type=text] { flex:1; min-width:0; padding:9px 12px; border-radius:10px; border:1px solid var(--line); background:#111317; color:var(--fg); font:inherit; }
+  button { padding:8px 14px; border-radius:10px; border:1px solid var(--line); background:#2a2f38; color:var(--fg); font:inherit; cursor:pointer; }
+  button:hover { border-color:var(--accent); }
+  button.primary { background:#1f4a63; border-color:#2d6b8f; }
+  label.chk { color:var(--dim); font-size:13px; display:flex; align-items:center; gap:6px; }
+  /* 调试面板 */
+  .bars div { display:grid; grid-template-columns:56px 1fr 44px; align-items:center; gap:8px; margin:4px 0; font-size:13px; }
+  .bar { height:8px; background:#111317; border-radius:4px; overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--accent); }
+  .bar i.hot { background:var(--warn); }
+  .kv { display:grid; grid-template-columns:auto 1fr; gap:2px 12px; font-size:13px; }
+  .kv span:nth-child(odd) { color:var(--dim); }
+  ul { margin:0; padding-left:18px; font-size:13px; }
+  .log { max-height:260px; overflow:auto; font-size:13px; }
+  .log p { margin:4px 0; }
+  .log .u { color:var(--accent); }
+  .log .p { color:var(--fg); }
+  .log .pro { color:var(--warn); }
+  .muted { color:var(--dim); font-size:12px; }
+  .tick { font-size:13px; padding:8px 10px; background:#111317; border-radius:8px; margin-top:8px; }
+</style>
+</head>
+<body>
+<main>
+  <section>
+    <div class="shell" id="shell">
+      <canvas id="oled" class="oled" width="128" height="64" title="点屏幕 = 摸摸头"></canvas>
+      <div class="led"><span><span class="dot" id="netDot"></span><span id="netText">连接中…</span></span><span id="devClock">--:--</span></div>
+    </div>
+    <div class="bubble empty" id="bubble">（点屏幕摸摸它，或者在下面说点什么）</div>
+    <div class="row">
+      <input type="text" id="input" placeholder="对团子说…（回车发送）" autocomplete="off">
+      <button class="primary" id="send">说</button>
+    </div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="voiceOn" checked> 用本地语音读出来</label>
+      <span class="muted" id="voiceNote"></span>
+    </div>
+    <p class="muted">这个页面同时是固件逻辑的原型：眨眼、呼吸、摸头反应、离线表情都在“设备本地”完成；每 5 秒拉取一次服务端事件（模拟 ESP32 定时醒来）。</p>
+  </section>
+
+  <section class="card">
+    <div class="row" style="margin-top:0">
+      <button data-adv="1">+1 小时</button>
+      <button data-adv="4">+4 小时</button>
+      <input type="text" id="toTime" placeholder="HH:MM" style="max-width:90px">
+      <button id="setTime">拨到</button>
+      <button class="primary" id="tickBtn">立即心跳</button>
+    </div>
+    <div class="tick" id="tickResult">还没有心跳记录</div>
+
+    <h2>内在状态 · <span id="srvTime">--</span> · <span id="phase">--</span> · <span id="ollama">--</span></h2>
+    <div class="bars" id="bars"></div>
+
+    <h2>主动闸门</h2>
+    <div class="kv" id="gate"></div>
+
+    <h2>待回访</h2>
+    <ul id="followups"></ul>
+
+    <h2>记得的关于你的事</h2>
+    <ul id="profile"></ul>
+
+    <h2>最近对话</h2>
+    <div class="log" id="log"></div>
+  </section>
+</main>
+
+<script>
+// ================= 设备本地：表情渲染 =================
+const cv = document.getElementById('oled');
+const ctx = cv.getContext('2d');
+const W = 128, H = 64;
+const ON = '#bfefff', OFF = '#000';
+
+function px(x, y, w = 1, h = 1) { ctx.fillRect(Math.round(x), Math.round(y), w, h); }
+function clr(x, y, w = 1, h = 1) { ctx.fillStyle = OFF; px(x, y, w, h); ctx.fillStyle = ON; }
+
+// 迷你位图字体（只需要几个字符）
+const GLYPHS = {
+  z: ['1111', '0010', '0100', '1111'],
+  Z: ['11111', '00010', '00100', '01000', '11111'],
+  '?': ['0110', '1001', '0010', '0100', '0000', '0100'],
+  '.': ['1'],
+  '!': ['1', '1', '1', '0', '1'],
+};
+function glyph(ch, x, y, s = 1) {
+  (GLYPHS[ch] || []).forEach((row, j) => [...row].forEach((b, i) => { if (b === '1') px(x + i * s, y + j * s, s, s); }));
+}
+
+// 眼睛的几种形状，(cx, cy) 是眼睛中心
+const eye = {
+  open(cx, cy, h = 16) { px(cx - 6, cy - h / 2, 12, h); clr(cx - 6, cy - h / 2); clr(cx + 5, cy - h / 2); clr(cx - 6, cy + h / 2 - 1); clr(cx + 5, cy + h / 2 - 1); clr(cx + 1, cy - h / 2 + 2, 3, 3); },
+  closed(cx, cy) { px(cx - 6, cy, 12, 2); },
+  happy(cx, cy) { for (let i = -6; i <= 5; i++) { const y = cy - 4 + Math.abs(i + 0.5) * 0.8; px(cx + i, y, 1, 2); } },
+  half(cx, cy) { px(cx - 6, cy - 1, 12, 2); px(cx - 5, cy + 1, 10, 4); },
+  look(cx, cy, dx, dy = 0) { px(cx - 6, cy - 8, 12, 16); clr(cx - 2 + dx, cy - 3 + dy, 4, 6); },
+  pout(cx, cy, dir) { for (let i = 0; i < 6; i++) { px(cx + dir * (i - 3), cy - 5 + i, 2, 2); px(cx + dir * (i - 3), cy + 5 - i, 2, 2); } },
+};
+const L = 44, R = 84, EY = 28;
+function brows(sad) { for (let i = 0; i < 8; i++) { const d = sad ? i * 0.4 : -i * 0.4; px(L - 4 + i, EY - 13 + (sad ? -d + 3 : d + 3), 1, 1); px(R + 3 - i, EY - 13 + (sad ? -d + 3 : d + 3), 1, 1); } }
+const mouth = {
+  w(y = 44) { px(58, y, 2, 1); px(60, y + 1, 2, 1); px(62, y, 3, 1); px(65, y + 1, 2, 1); px(67, y, 2, 1); },
+  flat(y = 45) { px(60, y, 8, 1); },
+  o(y = 43) { px(62, y, 4, 1); px(61, y + 1, 1, 2); px(66, y + 1, 1, 2); px(62, y + 3, 4, 1); },
+  frown(y = 46) { px(59, y + 1, 2, 1); px(61, y, 6, 1); px(67, y + 1, 2, 1); },
+};
+function blush() { for (let i = 0; i < 3; i++) { px(27 + i * 3, 40, 2, 1); px(93 + i * 3, 40, 2, 1); } }
+function ears() { for (let r = 0; r < 9; r++) { px(30 - r / 2, 2 + r, r + 1, 1); px(98 - r / 2, 2 + r, r + 1, 1); } }
+
+// 每种表情怎么画（t 是毫秒，用来做动画）
+const FACES = {
+  idle(t, b) { if (b) { eye.closed(L, EY); eye.closed(R, EY); } else { eye.open(L, EY); eye.open(R, EY); } mouth.w(); },
+  listen(t, b) { ears(); eye.open(L, EY + 2, 18); eye.open(R, EY + 2, 18); mouth.o(46); },
+  think(t) { const dx = Math.floor(t / 500) % 2 ? 2 : -2; eye.look(L, EY, dx, -2); eye.look(R, EY, dx, -2); mouth.flat(); const n = Math.floor(t / 300) % 4; for (let i = 0; i < n; i++) px(100 + i * 4, 8, 2, 2); },
+  happy(t) { eye.happy(L, EY); eye.happy(R, EY); mouth.w(42); blush(); },
+  shy(t, b) { if (b) { eye.closed(L, EY + 2); eye.closed(R, EY + 2); } else { eye.look(L, EY + 2, 0, 3); eye.look(R, EY + 2, 0, 3); } mouth.flat(46); blush(); },
+  pout(t) { eye.pout(L, EY, 1); eye.pout(R, EY, -1); mouth.frown(); },
+  sad(t, b) { brows(true); if (b) { eye.closed(L, EY); eye.closed(R, EY); } else { eye.look(L, EY, 0, 3); eye.look(R, EY, 0, 3); } mouth.frown(); if (Math.floor(t / 800) % 2) px(L - 5, EY + 10, 2, 3); },
+  lonely(t, b) { brows(true); if (b) { eye.closed(L, EY + 2); eye.closed(R, EY + 2); } else { eye.look(L, EY + 2, -2, 4); eye.look(R, EY + 2, -2, 4); } mouth.flat(47); },
+  curious(t, b) { if (b) { eye.closed(L, EY); } else { eye.open(L, EY, 18); } eye.open(R, EY, 12); mouth.o(); glyph('?', 104, 4 + (Math.floor(t / 400) % 2), 2); },
+  sleepy(t) { eye.half(L, EY); eye.half(R, EY); mouth.flat(); glyph('z', 104, 10 - (Math.floor(t / 600) % 3)); },
+  sleep(t) { eye.closed(L, EY + 2); eye.closed(R, EY + 2); mouth.flat(45); const k = Math.floor(t / 700) % 3; glyph('z', 98, 18 - k * 3); if (k > 0) glyph('Z', 106, 8 - k * 2); },
+  peek(t, b, age) {
+    // 从屏幕底边慢慢探头上来
+    const rise = Math.min(1, age / 900), y = 62 - rise * 24;
+    if (b) { eye.closed(L, y); eye.closed(R, y); } else { eye.look(L, y, 0, -3); eye.look(R, y, 0, -3); }
+    clr(0, 50, W, 14); px(0, 50, W, 2);
+    if (rise === 1) glyph('!', 108, 10, 2);
+  },
+};
+const BLINKABLE = new Set(['idle', 'listen', 'shy', 'sad', 'lonely', 'curious', 'peek']);
+
+// ================= 设备本地：本能与状态影子 =================
+const dev = {
+  online: false,
+  server: null,           // 最近一次从服务端拿到的权威状态
+  clockOffset: 0,         // 服务端时钟 - 本地时钟（相当于 SNTP 对时，包含虚拟时钟偏移）
+  override: null, overrideUntil: 0, overrideStart: 0,
+  blinkUntil: 0, nextBlink: performance.now() + 2500,
+  pats: 0,                // 还没上报的摸头次数（离线也会累积）
+  busy: false,
+};
+const queue = [];
+
+function devNow() { return new Date(Date.now() + dev.clockOffset); }
+
+function baseFace() {
+  // 断线时由本地生物钟决定表情：晚上睡觉，白天想主人
+  if (!dev.online) { const h = devNow().getHours(); return (h >= 23 || h < 7) ? 'sleep' : 'lonely'; }
+  const s = dev.server;
+  if (!s) return 'idle';
+  if (s.phase === 'asleep') return 'sleep';
+  if (s.phase === 'sleepy') return 'sleepy';
+  if (s.loneliness >= 0.8) return 'lonely';
+  return 'idle';
+}
+
+function setFace(name, ms) {
+  dev.override = name; dev.overrideStart = performance.now();
+  dev.overrideUntil = ms ? performance.now() + ms : Infinity;
+}
+function clearFace() { dev.override = null; }
+
+function render() {
+  const t = performance.now();
+  if (dev.override && t > dev.overrideUntil) dev.override = null;
+  const face = dev.override || baseFace();
+  if (BLINKABLE.has(face) && t > dev.nextBlink) { dev.blinkUntil = t + 140; dev.nextBlink = t + 2000 + Math.random() * 4500; }
+  const blinking = t < dev.blinkUntil;
+  // 呼吸：每 2.4 秒上下浮动 1px；防烧屏：每分钟整体平移一点
+  const breathe = Math.sin(t / 1200) > 0 ? 1 : 0;
+  const drift = [0, 1, 0, -1][Math.floor(Date.now() / 60000) % 4];
+  ctx.fillStyle = OFF; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.translate(drift, breathe); ctx.fillStyle = ON;
+  (FACES[face] || FACES.idle)(t, blinking, t - dev.overrideStart);
+  ctx.restore();
+  ctx.fillStyle = ON;
+  if (!dev.online) { px(2, 2); px(4, 4); px(3, 3); px(2, 4); px(4, 2); }  // 角落的小 ×：没连上大脑
+  document.getElementById('devClock').textContent = devNow().toTimeString().slice(0, 5);
+}
+setInterval(render, 100);
+
+const VIBES = { tap: [25], purr: [40, 80, 40], nudge: [80, 120, 80, 120, 80] };
+function vibe(name) {
+  if (!VIBES[name]) return;
+  const shell = document.getElementById('shell');
+  shell.className = 'shell'; void shell.offsetWidth; shell.classList.add('vibe-' + name);
+  try { navigator.vibrate && navigator.vibrate(VIBES[name]); } catch (e) {}
+}
+
+// 摸头：纯本地反射，不等服务端；次数攒着下次醒来上报
+cv.addEventListener('click', () => {
+  dev.pats++;
+  if (baseFace() === 'sleep' && !dev.override) { setFace('sleepy', 1500); vibe('tap'); }
+  else { setFace('happy', 1500); vibe('purr'); }
+});
+
+// ================= 语音（只用本地语音，不把文字发给在线服务） =================
+let zhVoice = null;
+function pickVoice() {
+  const vs = speechSynthesis.getVoices().filter(v => v.localService && /^zh/i.test(v.lang));
+  zhVoice = vs.find(v => /CN/i.test(v.lang)) || vs[0] || null;
+  document.getElementById('voiceNote').textContent = zhVoice ? zhVoice.name : '（没找到本地中文语音，只显示文字）';
+}
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+
+function speak(text, voice) {
+  return new Promise(resolve => {
+    if (!zhVoice || !document.getElementById('voiceOn').checked) return setTimeout(resolve, Math.max(2500, text.length * 220));
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = zhVoice; u.lang = zhVoice.lang;
+    if (voice === 'sleepy') { u.rate = 0.75; u.pitch = 0.8; u.volume = 0.6; } else { u.rate = 1.1; u.pitch = 1.3; }
+    u.onend = u.onerror = () => resolve();
+    speechSynthesis.speak(u);
+  });
+}
+
+function showBubble(text, proactive) {
+  const b = document.getElementById('bubble');
+  b.classList.remove('empty');
+  b.textContent = (proactive ? '【主动】' : '') + text;
+}
+
+// 播放一条输出：表情 + 震动 + 文字 + 语音，按顺序排队
+async function play(item) {
+  setFace(item.face, 600000);
+  vibe(item.vibe);
+  showBubble(item.text, item.proactive);
+  await speak(item.text, item.voice);
+  setFace(item.face, 2500);
+}
+async function drain() {
+  if (dev.busy) return;
+  dev.busy = true;
+  while (queue.length) await play(queue.shift());
+  dev.busy = false;
+}
+
+// ================= 和大脑通信 =================
+async function api(path, body) {
+  const opt = body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  const r = await fetch(path, opt);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+function setOnline(on) {
+  dev.online = on;
+  document.getElementById('netDot').classList.toggle('on', on);
+  document.getElementById('netText').textContent = on ? '已连上大脑' : '离线（本地本能运行中）';
+}
+
+async function poll() {
+  try {
+    if (dev.pats > 0) { const n = dev.pats; await api('/api/device_log', { events: [{ kind: 'pat', count: n }] }); dev.pats -= n; }
+    const r = await api('/api/poll');
+    setOnline(true);
+    dev.server = r.state;
+    dev.clockOffset = new Date(r.time.replace(' ', 'T')).getTime() - Date.now();
+    r.events.forEach(e => queue.push({ ...e, proactive: true }));
+    drain();
+  } catch (e) { setOnline(false); }
+}
+setInterval(poll, 5000);
+poll();
+
+const input = document.getElementById('input');
+input.addEventListener('input', () => { if (input.value) setFace('listen', 4000); });
+async function send() {
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  setFace('think', 600000);
+  try {
+    const r = await api('/api/chat', { text });
+    setOnline(true);
+    dev.server = r.state;
+    queue.push(r); drain();
+  } catch (e) { setOnline(false); clearFace(); showBubble('（没连上大脑）'); }
+  refresh();
+}
+document.getElementById('send').onclick = send;
+input.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) send(); });
+
+// ================= 调试面板 =================
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; }
+
+function renderTick(t) {
+  const box = document.getElementById('tickResult');
+  if (!t) { box.textContent = '还没有心跳记录'; return; }
+  box.textContent = `[${t.time.slice(5, 16)}] ` + (t.fired ? `主动搭话（${t.detail}）：${t.text}` : `没开口：${t.reason}`);
+}
+
+async function refresh() {
+  let s;
+  try { s = await api('/api/state'); } catch (e) { return; }
+  document.getElementById('srvTime').textContent = s.time.slice(5, 16);
+  document.getElementById('phase').textContent = { awake: '清醒', sleepy: '犯困', asleep: '睡着' }[s.state.phase] + (s.state.sleepy_talk ? ' · 深夜模式' : '');
+  const bars = document.getElementById('bars'); bars.innerHTML = '';
+  [['精力', 'energy', 0.45, false], ['孤单', 'loneliness', 0.8, true], ['好奇', 'curiosity', 0.85, true]].forEach(([name, k, th, hot]) => {
+    const v = s.state[k], row = el('div'), bar = el('div', 'bar'), fill = el('i');
+    fill.style.width = (v * 100) + '%';
+    if (hot && v >= th) fill.className = 'hot';
+    bar.append(fill); row.append(el('span', '', name), bar, el('span', '', v.toFixed(2)));
+    bars.append(row);
+  });
+  const g = s.gate, gate = document.getElementById('gate'); gate.innerHTML = '';
+  [['今天主动', `${g.proactive_today} / ${g.daily_limit}`], ['被无视', `${g.ignored_streak} 次（冷却 ${g.cooldown_hours} 小时）`],
+   ['冷却剩余', g.cooldown_left ? `${g.cooldown_left} 小时` : '无'], ['免打扰', g.quiet ? '是' : '否'],
+   ['上次主动', g.last_proactive || '从没有'], ['离上次说话', `${s.state.hours_alone.toFixed(1)} 小时`]]
+    .forEach(([k, v]) => gate.append(el('span', '', k), el('span', '', v)));
+  const fu = document.getElementById('followups'); fu.innerHTML = '';
+  if (!s.followups.length) fu.append(el('li', 'muted', '（没有）'));
+  s.followups.forEach(f => fu.append(el('li', '', `${f.due_at.slice(5, 16)} · ${f.fact}${f.mood ? '（' + f.mood + '）' : ''} → ${f.hint}`)));
+  const pf = document.getElementById('profile'); pf.innerHTML = '';
+  if (!s.profile.length) pf.append(el('li', 'muted', '（还不了解你）'));
+  s.profile.forEach(p => pf.append(el('li', '', `${p.key}：${p.value}`)));
+  const log = document.getElementById('log'); log.innerHTML = '';
+  s.messages.forEach(m => log.append(el('p', m.role === 'user' ? 'u' : (m.proactive ? 'pro' : 'p'),
+    `${m.ts.slice(11, 16)} ${m.role === 'user' ? '你' : '团子'}${m.proactive ? '（主动）' : ''}：${m.text}`)));
+  log.scrollTop = log.scrollHeight;
+  renderTick(s.last_tick);
+}
+setInterval(refresh, 3000);
+refresh();
+
+function checkHealth() {
+  api('/api/health').then(h => { document.getElementById('ollama').textContent = h.ollama ? `Ollama ✓ ${h.model}` : 'Ollama 未连接'; })
+    .catch(() => { document.getElementById('ollama').textContent = '服务未连接'; });
+}
+setInterval(checkHealth, 30000);
+checkHealth();
+
+document.querySelectorAll('[data-adv]').forEach(b => b.onclick = async () => {
+  await api('/api/clock', { advance_hours: +b.dataset.adv }); await poll(); refresh();
+});
+document.getElementById('setTime').onclick = async () => {
+  const v = document.getElementById('toTime').value.trim();
+  if (!/^\d{1,2}:\d{2}$/.test(v)) return;
+  await api('/api/clock', { to: v }); await poll(); refresh();
+};
+document.getElementById('tickBtn').onclick = async () => {
+  const r = await api('/api/tick', {}); renderTick(r); await poll(); refresh();
+};
+</script>
+</body>
+</html>

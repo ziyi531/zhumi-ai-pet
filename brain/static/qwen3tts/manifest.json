@@ -1,0 +1,1154 @@
+{
+ "voices": {
+  "ruanmeng": {
+   "name": "软萌少女",
+   "desc": "十六七岁的少女，声音软糯甜美，音调偏高，说话带一点鼻音和撒娇的尾音，语速稍慢，亲切黏人。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "ruanmeng_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "ruanmeng_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "ruanmeng_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "ruanmeng_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "ruanmeng_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "ruanmeng_line0.wav",
+     "sec": 4.5,
+     "cost": 11.2,
+     "rate": 3.49
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "ruanmeng_line1.wav",
+     "sec": 3.0,
+     "cost": 7.6,
+     "rate": 4.39
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "ruanmeng_line2.wav",
+     "sec": 2.5,
+     "cost": 6.4,
+     "rate": 4.64
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "ruanmeng_line3.wav",
+     "sec": 2.9,
+     "cost": 8.0,
+     "rate": 3.87
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "ruanmeng_line4.wav",
+     "sec": 2.6,
+     "cost": 6.3,
+     "rate": 4.14
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "ruanmeng_line5.wav",
+     "sec": 4.2,
+     "cost": 11.1,
+     "rate": 3.79
+    }
+   ],
+   "batch": "第一批"
+  },
+  "naisheng": {
+   "name": "奶声小孩",
+   "desc": "七八岁的小女孩，奶声奶气，带点稚气，音调高，口齿清楚，说话活泼好奇。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "naisheng_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "naisheng_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "naisheng_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "naisheng_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "naisheng_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "naisheng_line0.wav",
+     "sec": 2.8,
+     "cost": 7.0,
+     "rate": 4.93
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "naisheng_line1.wav",
+     "sec": 3.9,
+     "cost": 10.3,
+     "rate": 4.54
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "naisheng_line2.wav",
+     "sec": 2.4,
+     "cost": 5.4,
+     "rate": 4.64
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "naisheng_line3.wav",
+     "sec": 2.4,
+     "cost": 7.5,
+     "rate": 4.64
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "naisheng_line4.wav",
+     "sec": 2.0,
+     "cost": 6.2,
+     "rate": 4.96
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "naisheng_line5.wav",
+     "sec": 6.4,
+     "cost": 15.5,
+     "rate": 2.72
+    }
+   ],
+   "batch": "第一批"
+  },
+  "jingling": {
+   "name": "中性小精灵",
+   "desc": "声音中性、清亮通透的小精灵，听不出是男孩还是女孩，音调偏高，轻快灵动，带点俏皮。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "jingling_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "jingling_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "jingling_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "jingling_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "jingling_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "jingling_line0.wav",
+     "sec": 2.7,
+     "cost": 6.2,
+     "rate": 5.07
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "jingling_line1.wav",
+     "sec": 2.9,
+     "cost": 6.5,
+     "rate": 4.93
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "jingling_line2.wav",
+     "sec": 2.5,
+     "cost": 6.3,
+     "rate": 4.73
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "jingling_line3.wav",
+     "sec": 2.0,
+     "cost": 4.6,
+     "rate": 5.48
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "jingling_line4.wav",
+     "sec": 1.8,
+     "cost": 4.4,
+     "rate": 5.98
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "jingling_line5.wav",
+     "sec": 5.3,
+     "cost": 12.6,
+     "rate": 3.42
+    }
+   ],
+   "batch": "第一批"
+  },
+  "yuanqi": {
+   "name": "元气少年",
+   "desc": "十二三岁的男孩，声音清亮干净，元气活泼，说话轻快，偶尔带点小骄傲。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "yuanqi_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "yuanqi_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "yuanqi_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "yuanqi_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "yuanqi_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "yuanqi_line0.wav",
+     "sec": 3.0,
+     "cost": 6.8,
+     "rate": 5.07
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "yuanqi_line1.wav",
+     "sec": 3.0,
+     "cost": 6.8,
+     "rate": 4.67
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "yuanqi_line2.wav",
+     "sec": 2.4,
+     "cost": 5.5,
+     "rate": 4.88
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "yuanqi_line3.wav",
+     "sec": 2.0,
+     "cost": 4.7,
+     "rate": 5.16
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "yuanqi_line4.wav",
+     "sec": 1.8,
+     "cost": 3.9,
+     "rate": 6.03
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "yuanqi_line5.wav",
+     "sec": 5.6,
+     "cost": 12.4,
+     "rate": 3.49
+    }
+   ],
+   "batch": "第一批"
+  },
+  "lanmao": {
+   "name": "慵懒猫系",
+   "desc": "年轻女孩，声音轻柔慵懒，带一点气声，说话慢悠悠的，像刚睡醒的小猫，温柔黏人。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "lanmao_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "lanmao_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "lanmao_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "lanmao_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "lanmao_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "lanmao_line0.wav",
+     "sec": 3.9,
+     "cost": 8.8,
+     "rate": 3.85
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "lanmao_line1.wav",
+     "sec": 3.3,
+     "cost": 7.2,
+     "rate": 4.33
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "lanmao_line2.wav",
+     "sec": 2.6,
+     "cost": 5.7,
+     "rate": 4.78
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "lanmao_line3.wav",
+     "sec": 2.6,
+     "cost": 5.8,
+     "rate": 4.3
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "lanmao_line4.wav",
+     "sec": 2.9,
+     "cost": 7.7,
+     "rate": 4.59
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "lanmao_line5.wav",
+     "sec": 5.4,
+     "cost": 14.3,
+     "rate": 3.75
+    }
+   ],
+   "batch": "第一批"
+  },
+  "nuomi": {
+   "name": "糯米团子",
+   "batch": "第二批 · 小宠物软糯",
+   "desc": "十五六岁的软糯少女，声音又软又糯，像刚出炉的糯米团子，音色小巧圆润，像个小小的身体在说话，音调偏高，带一点奶气和鼻音，句尾常常软软地上扬拖长。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "nuomi_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "nuomi_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "nuomi_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "nuomi_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "nuomi_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "nuomi_line0.wav",
+     "sec": 3.4,
+     "cost": 1.8,
+     "rate": 3.63
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "nuomi_line1.wav",
+     "sec": 3.0,
+     "cost": 1.3,
+     "rate": 4.2
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "nuomi_line2.wav",
+     "sec": 2.5,
+     "cost": 1.2,
+     "rate": 4.22
+    },
+    {
+     "mood": "happy",
+     "text": "嘿嘿，再摸摸我嘛～",
+     "file": "nuomi_line3.wav",
+     "sec": 2.2,
+     "cost": 1.0,
+     "rate": 3.28
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "nuomi_line4.wav",
+     "sec": 2.2,
+     "cost": 1.0,
+     "rate": 4.3
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "nuomi_line5.wav",
+     "sec": 1.9,
+     "cost": 1.0,
+     "rate": 4.79
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "nuomi_line6.wav",
+     "sec": 4.8,
+     "cost": 2.2,
+     "rate": 3.38
+    }
+   ]
+  },
+  "maomi": {
+   "name": "撒娇小猫",
+   "batch": "第二批 · 小宠物软糯",
+   "desc": "软糯的少女音，像一只黏人的小猫在撒娇蹭人，声音轻软，带一点气声和呼噜般的鼻音，音调偏高，说话慢悠悠的，尾音拖得软软长长。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "maomi_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "maomi_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "maomi_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "maomi_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "maomi_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "maomi_line0.wav",
+     "sec": 3.4,
+     "cost": 1.5,
+     "rate": 3.63
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "maomi_line1.wav",
+     "sec": 4.0,
+     "cost": 1.7,
+     "rate": 3.39
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "maomi_line2.wav",
+     "sec": 3.0,
+     "cost": 1.3,
+     "rate": 3.55
+    },
+    {
+     "mood": "happy",
+     "text": "嘿嘿，再摸摸我嘛～",
+     "file": "maomi_line3.wav",
+     "sec": 2.0,
+     "cost": 0.9,
+     "rate": 3.77
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "maomi_line4.wav",
+     "sec": 2.0,
+     "cost": 1.0,
+     "rate": 4.96
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "maomi_line5.wav",
+     "sec": 1.6,
+     "cost": 0.8,
+     "rate": 6.49
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "maomi_line6.wav",
+     "sec": 4.7,
+     "cost": 2.1,
+     "rate": 3.63
+    }
+   ]
+  },
+  "cangshu": {
+   "name": "小仓鼠",
+   "batch": "第二批 · 小宠物软糯",
+   "desc": "声音软糯的少女，音色小小的、圆圆的，像一只小仓鼠在说话，奶声奶气但不幼稚，说话时好像嘴里含着糖，咬字有点软乎乎的，乖巧黏人。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "cangshu_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "cangshu_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "cangshu_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "cangshu_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "cangshu_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "cangshu_line0.wav",
+     "sec": 2.9,
+     "cost": 1.3,
+     "rate": 4.39
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "cangshu_line1.wav",
+     "sec": 2.9,
+     "cost": 1.3,
+     "rate": 4.57
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "cangshu_line2.wav",
+     "sec": 2.6,
+     "cost": 1.3,
+     "rate": 4.04
+    },
+    {
+     "mood": "happy",
+     "text": "嘿嘿，再摸摸我嘛～",
+     "file": "cangshu_line3.wav",
+     "sec": 1.9,
+     "cost": 0.9,
+     "rate": 3.82
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "cangshu_line4.wav",
+     "sec": 2.4,
+     "cost": 1.1,
+     "rate": 3.87
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "cangshu_line5.wav",
+     "sec": 2.7,
+     "cost": 1.3,
+     "rate": 4.22
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "cangshu_line6.wav",
+     "sec": 5.8,
+     "cost": 2.6,
+     "rate": 2.82
+    }
+   ]
+  },
+  "tuzi": {
+   "name": "小白兔",
+   "batch": "第二批 · 小宠物软糯",
+   "desc": "温柔软糯的少女音，音调清甜偏高，声音轻轻的、有点怯生生，像一只小白兔，带轻微的鼻音和气声，尾音软绵绵的，让人很想保护她。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "tuzi_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "tuzi_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "tuzi_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "tuzi_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "tuzi_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "tuzi_line0.wav",
+     "sec": 2.6,
+     "cost": 1.2,
+     "rate": 4.77
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "tuzi_line1.wav",
+     "sec": 2.7,
+     "cost": 1.2,
+     "rate": 4.61
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "tuzi_line2.wav",
+     "sec": 2.4,
+     "cost": 1.1,
+     "rate": 4.3
+    },
+    {
+     "mood": "happy",
+     "text": "嘿嘿，再摸摸我嘛～",
+     "file": "tuzi_line3.wav",
+     "sec": 1.9,
+     "cost": 0.9,
+     "rate": 3.77
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "tuzi_line4.wav",
+     "sec": 2.4,
+     "cost": 1.2,
+     "rate": 4.02
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "tuzi_line5.wav",
+     "sec": 2.6,
+     "cost": 1.2,
+     "rate": 5.08
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "tuzi_line6.wav",
+     "sec": 4.0,
+     "cost": 1.8,
+     "rate": 4.03
+    }
+   ]
+  },
+  "lingti": {
+   "name": "电路小灵体",
+   "batch": "第二批 · 小宠物软糯",
+   "desc": "一只寄居在电路板里的小灵体，声音是软糯的少女音，又带着小动物般的奶萌感，音色小巧圆润，音调偏高，带轻微鼻音和气声，句尾软软上扬，黏人、好奇，偶尔有点小傲娇。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "语气自然亲切，像在和好朋友聊天。",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "lingti_ref_normal.wav"
+    },
+    {
+     "mood": "happy",
+     "tone": "此刻非常开心，带着笑意和撒娇的语气。",
+     "text": "嘿嘿，被你摸头了，好舒服呀。",
+     "file": "lingti_ref_happy.wav"
+    },
+    {
+     "mood": "pout",
+     "tone": "此刻有点傲娇，假装生气，嘴硬心软。",
+     "text": "哼，才不是想你了呢，我只是刚好醒着。",
+     "file": "lingti_ref_pout.wav"
+    },
+    {
+     "mood": "sad",
+     "tone": "此刻有点委屈和失落，声音低一些，带着鼻音。",
+     "text": "你都好久没理我了……我一个人好无聊。",
+     "file": "lingti_ref_sad.wav"
+    },
+    {
+     "mood": "sleepy",
+     "tone": "此刻非常困，声音迷迷糊糊，打着哈欠，语速很慢。",
+     "text": "哈欠……好困哦，我们一起去睡觉吧。",
+     "file": "lingti_ref_sleepy.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "lingti_line0.wav",
+     "sec": 2.8,
+     "cost": 1.2,
+     "rate": 4.39
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "lingti_line1.wav",
+     "sec": 2.8,
+     "cost": 1.2,
+     "rate": 4.33
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "lingti_line2.wav",
+     "sec": 2.6,
+     "cost": 1.2,
+     "rate": 4.04
+    },
+    {
+     "mood": "happy",
+     "text": "嘿嘿，再摸摸我嘛～",
+     "file": "lingti_line3.wav",
+     "sec": 1.9,
+     "cost": 0.8,
+     "rate": 4.0
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "lingti_line4.wav",
+     "sec": 2.4,
+     "cost": 1.1,
+     "rate": 3.98
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "lingti_line5.wav",
+     "sec": 2.2,
+     "cost": 1.0,
+     "rate": 4.35
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "lingti_line6.wav",
+     "sec": 5.3,
+     "cost": 2.3,
+     "rate": 3.05
+    }
+   ]
+  },
+  "cangshu_slow": {
+   "name": "小仓鼠 · 平稳 · 慢一点",
+   "batch": "第三批 · 小仓鼠改进（同一个音色）",
+   "desc": "所有台词都从同一段平常语气的参考音克隆（参考音先不变调放慢约 15%），情绪只靠台词本身；采样更保守，起伏更小。音色同第二批的“小仓鼠”。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "放慢后的参考音",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "cangshu_slow_ref_normal.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "cangshu_slow_line0.wav",
+     "sec": 3.0,
+     "rate": 4.2,
+     "tries": 1
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "cangshu_slow_line1.wav",
+     "sec": 2.2,
+     "rate": 5.86,
+     "tries": 1
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "cangshu_slow_line2.wav",
+     "sec": 2.7,
+     "rate": 3.91,
+     "tries": 1
+    },
+    {
+     "mood": "happy",
+     "text": "嘿嘿，再摸摸我嘛～",
+     "file": "cangshu_slow_line3.wav",
+     "sec": 1.8,
+     "rate": 4.0,
+     "tries": 1
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "cangshu_slow_line4.wav",
+     "sec": 2.4,
+     "rate": 3.82,
+     "tries": 1
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "cangshu_slow_line5.wav",
+     "sec": 1.9,
+     "rate": 5.34,
+     "tries": 1
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "cangshu_slow_line6.wav",
+     "sec": 4.1,
+     "rate": 3.57,
+     "tries": 1
+    }
+   ]
+  },
+  "cangshu_slow_mood": {
+   "name": "小仓鼠 · 平稳 · 慢一点 · 淡淡情绪",
+   "batch": "第三批 · 小仓鼠改进（同一个音色）",
+   "desc": "在上一个的基础上，每句加一句很淡的语气提示：像平时随口和熟悉的人聊天，不像朗读也不像配音，语气起伏很小，语速稍慢、不慌不忙。音色同第二批的“小仓鼠”。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "放慢后的参考音",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "cangshu_slow_ref_normal.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "cangshu_slow_mood_line0.wav",
+     "sec": 3.4,
+     "rate": 3.68,
+     "tries": 1
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "cangshu_slow_mood_line1.wav",
+     "sec": 3.4,
+     "rate": 3.85,
+     "tries": 1
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "cangshu_slow_mood_line2.wav",
+     "sec": 2.8,
+     "rate": 3.94,
+     "tries": 1
+    },
+    {
+     "mood": "happy",
+     "text": "嘿嘿，再摸摸我嘛～",
+     "file": "cangshu_slow_mood_line3.wav",
+     "sec": 2.1,
+     "rate": 3.69,
+     "tries": 1
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "cangshu_slow_mood_line4.wav",
+     "sec": 2.5,
+     "rate": 3.91,
+     "tries": 1
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "cangshu_slow_mood_line5.wav",
+     "sec": 2.3,
+     "rate": 4.44,
+     "tries": 1
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "cangshu_slow_mood_line6.wav",
+     "sec": 3.8,
+     "rate": 3.86,
+     "tries": 1
+    }
+   ]
+  },
+  "cangshu_slow_mood_post": {
+   "name": "小仓鼠 · 平稳 · 再慢一点 · 淡淡情绪",
+   "batch": "第三批 · 小仓鼠改进（同一个音色）",
+   "desc": "和上一个一样，再把成品不变调放慢约 6%。音色同第二批的“小仓鼠”。",
+   "refs": [
+    {
+     "mood": "normal",
+     "tone": "放慢后的参考音",
+     "text": "你好呀，我是团子，今天也要一起加油哦。",
+     "file": "cangshu_slow_ref_normal.wav"
+    }
+   ],
+   "lines": [
+    {
+     "mood": "normal",
+     "text": "下午说眼睛酸，现在好点了吗？",
+     "file": "cangshu_slow_mood_post_line0.wav",
+     "sec": 3.6,
+     "rate": 3.41,
+     "tries": 1
+    },
+    {
+     "mood": "normal",
+     "text": "……你还在忙吗？我探个头看看你。",
+     "file": "cangshu_slow_mood_post_line1.wav",
+     "sec": 3.5,
+     "rate": 3.58,
+     "tries": 1
+    },
+    {
+     "mood": "happy",
+     "text": "你回来啦！我等你好久了～",
+     "file": "cangshu_slow_mood_post_line2.wav",
+     "sec": 2.9,
+     "rate": 3.66,
+     "tries": 1
+    },
+    {
+     "mood": "happy",
+     "text": "嘿嘿，再摸摸我嘛～",
+     "file": "cangshu_slow_mood_post_line3.wav",
+     "sec": 2.1,
+     "rate": 3.42,
+     "tries": 1
+    },
+    {
+     "mood": "pout",
+     "text": "哼，这次就先原谅你吧。",
+     "file": "cangshu_slow_mood_post_line4.wav",
+     "sec": 2.6,
+     "rate": 3.64,
+     "tries": 1
+    },
+    {
+     "mood": "sad",
+     "text": "你是不是把我忘了呀……",
+     "file": "cangshu_slow_mood_post_line5.wav",
+     "sec": 2.4,
+     "rate": 4.1,
+     "tries": 1
+    },
+    {
+     "mood": "sleepy",
+     "text": "已经很晚了哦，你也快去睡吧……晚安。",
+     "file": "cangshu_slow_mood_post_line6.wav",
+     "sec": 4.0,
+     "rate": 3.63,
+     "tries": 1
+    }
+   ]
+  }
+ },
+ "perf": {
+  "gpu_before_mb": 354,
+  "engine": "faster-qwen3-tts",
+  "design_load_s": 11.0,
+  "design_peak_mb": 5412,
+  "design_rtf": 0.51,
+  "clone_load_s": 4.0,
+  "clone_peak_mb": 3632,
+  "clone_rtf": 0.46,
+  "clone_avg_line_s": 1.3,
+  "gpu": "NVIDIA GeForce RTX 4060 Laptop GPU"
+ },
+ "order": [
+  "cangshu_slow",
+  "cangshu_slow_mood",
+  "cangshu_slow_mood_post",
+  "nuomi",
+  "maomi",
+  "cangshu",
+  "tuzi",
+  "lingti",
+  "ruanmeng",
+  "naisheng",
+  "jingling",
+  "yuanqi",
+  "lanmao"
+ ]
+}

@@ -1,0 +1,9 @@
+# 团子的声音服务（tts_service.py）的独立环境 .venv-fastq，和大脑的环境分开（依赖冲突）。
+# 先装 CUDA 版 torch：
+#   .venv-fastq\Scripts\python -m pip install torch==2.8.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+# 再装这里：
+#   .venv-fastq\Scripts\python -m pip install -r requirements-tts.txt
+faster-qwen3-tts==0.5.4
+transformers==5.15.1   # 必须锁：5.20 会报 MimiConfig has no rope_theta
+audiotsm==0.1.2        # tools/qwen3tts_refine.py 不变调放慢参考音用
+requests

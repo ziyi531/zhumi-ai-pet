@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>猪咪</title>
+<style>
+  :root { --bg:#f3efe7; --panel:#fffdf9; --line:#e6dfd3; --fg:#2b2622; --dim:#8a8178; --accent:#e8789a; --shell:#f7f3ec; --shell-edge:#ddd6ca; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#17181b; --panel:#212328; --line:#34373d; --fg:#ece8e2; --dim:#9a958e; --accent:#f08fae; --shell:#e9e4da; --shell-edge:#c9c2b5; }
+  }
+  :root[data-theme="dark"] { --bg:#17181b; --panel:#212328; --line:#34373d; --fg:#ece8e2; --dim:#9a958e; --accent:#f08fae; --shell:#e9e4da; --shell-edge:#c9c2b5; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.55 system-ui, "Microsoft YaHei", sans-serif; }
+  main { max-width:560px; margin:0 auto; padding:24px 16px 32px; display:flex; flex-direction:column; gap:16px; min-height:100vh; }
+  header { display:flex; justify-content:space-between; align-items:center; }
+  header h1 { margin:0; font-size:18px; }
+  .chip { font-size:12px; color:var(--dim); display:flex; align-items:center; gap:6px; }
+  .dot { width:8px; height:8px; border-radius:50%; background:#bbb; }
+  .dot.on { background:#5fc98a; }
+  .dot.warn { background:#e9b44c; }
+
+  /* 立创成品机的样子：米白外壳，屏幕左边是摄像头 */
+  .shell { background:var(--shell); border-radius:30px; padding:20px 24px 20px 50px; position:relative;
+           box-shadow:inset 0 -5px 0 var(--shell-edge), 0 12px 30px #0002; }
+  .shell::before { content:""; position:absolute; left:18px; top:50%; width:15px; height:15px; margin-top:-7.5px; border-radius:50%;
+                   background:radial-gradient(circle at 35% 35%, #556 0 20%, #111 45%, #222 100%); box-shadow:0 0 0 3px var(--shell-edge); }
+  .screen { display:block; width:100%; aspect-ratio:4/3; border-radius:10px; background:#f7f6f2; cursor:pointer; box-shadow:0 0 0 6px #1b1b1d; touch-action:manipulation; }
+  .shell.vibe-tap   { animation:shake .08s linear 2; }
+  .shell.vibe-purr  { animation:shake .12s linear 4; }
+  .shell.vibe-nudge { animation:shake .1s linear 8; }
+  @keyframes shake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-3px,1px)} 75%{transform:translate(3px,-1px)} }
+
+  .bubble { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:12px 16px; min-height:52px; position:relative; }
+  .bubble::before { content:""; position:absolute; top:-8px; left:50%; margin-left:-8px; width:14px; height:14px; background:var(--panel);
+                    border-left:1px solid var(--line); border-top:1px solid var(--line); transform:rotate(45deg); }
+  .bubble .who { font-size:12px; color:var(--dim); }
+  .bubble .you { color:var(--dim); font-size:13px; margin-bottom:4px; }
+  .bubble.proactive { border-color:var(--accent); }
+  .bubble .src { color:var(--dim); font-size:12px; margin-top:6px; }
+
+  .composer { display:flex; gap:8px; }
+  .composer input { flex:1; min-width:0; padding:11px 14px; border-radius:14px; border:1px solid var(--line); background:var(--panel); color:var(--fg); font:inherit; }
+  .composer button { padding:0 18px; border-radius:14px; border:0; background:var(--accent); color:#fff; font:inherit; cursor:pointer; }
+  .composer button:disabled { opacity:.5; cursor:default; }
+  .talk { width:100%; padding:14px; border-radius:16px; border:1px solid var(--line); background:var(--panel); color:var(--fg);
+          font:inherit; font-size:16px; cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:none; }
+  .talk.on { background:var(--accent); border-color:var(--accent); color:#fff; animation:pulse 1.2s ease-in-out infinite; }
+  .talk:disabled { opacity:.5; cursor:default; }
+  @keyframes pulse { 0%,100% { box-shadow:0 0 0 0 #e8789a55; } 50% { box-shadow:0 0 0 8px #e8789a00; } }
+  .tools { display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--dim); flex-wrap:wrap; gap:8px; }
+  .tools label { display:flex; align-items:center; gap:6px; }
+  .tools a { color:var(--dim); }
+  .hint { font-size:12px; color:var(--dim); text-align:center; margin:0; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>猪咪</h1>
+    <span class="chip"><span class="dot" id="netDot"></span><span id="netText">连接中…</span></span>
+  </header>
+
+  <div class="shell" id="shell"><canvas class="screen" id="screen" title="摸摸头"></canvas></div>
+
+  <div class="bubble" id="bubble">
+    <div class="you" id="you" hidden></div>
+    <div id="petText">（摸摸它的头，或者跟它说点什么）</div>
+    <div class="src" id="src" hidden></div>
+  </div>
+
+  <button class="talk" id="talk" type="button">按住说话（电脑上也可以按住空格）</button>
+
+  <form class="composer" id="composer">
+    <input id="input" type="text" placeholder="跟猪咪说…" autocomplete="off" maxlength="300">
+    <button id="send" type="submit">说</button>
+  </form>
+
+  <div class="tools">
+    <label><input type="checkbox" id="voiceOn" checked> 让猪咪说出声<span id="voiceNote"></span></label>
+    <span><a href="/memory" target="_blank">记忆</a> · <a href="/voices" target="_blank">声音试听</a> · <a href="/debug" target="_blank">调试面板（快进时间）</a></span>
+  </div>
+  <p class="hint">猪咪住在你的电脑里：它会犯困、会想你，也会自己来找你说话。板子上喊“Hi，喵喵”叫醒它，或者按住屏幕说话。</p>
+</main>
+
+<script src="face_engine.js"></script>
+<script>
+// ================= 屏幕：八条风表情 =================
+const BAJO = STYLES.bajo;
+const DPR = Math.min(2, window.devicePixelRatio || 1);
+const screenEl = document.getElementById('screen');
+screenEl.width = 640 * DPR; screenEl.height = 480 * DPR;
+const sctx = screenEl.getContext('2d');
+const faceSt = newState('idle');
+const petHearts = [];
+
+// 本地“本能”：和固件 face_display 一样的规则
+const pet = {
+  online: false,
+  server: null,          // 服务端给的权威状态（精力、孤单、作息阶段）
+  clockOffset: 0,        // 服务端时钟 - 本地时钟（调试面板快进后也跟着变）
+  hold: null,            // 一直保持的表情（比如等回复时在思考）
+  flash: null, flashUntil: 0,
+  pats: 0,               // 还没上报的摸头次数
+  busy: false,
+};
+const outbox = [];       // 待播放的回复和主动事件
+
+function petNow() { return new Date(Date.now() + pet.clockOffset); }
+function baseFace() {
+  if (!pet.online) { const h = petNow().getHours(); return (h >= 23 || h < 7) ? 'sleep' : 'lonely'; }
+  const s = pet.server;
+  if (!s) return 'idle';
+  if (s.phase === 'asleep') return 'sleep';
+  if (s.phase === 'sleepy') return 'sleepy';
+  if (s.loneliness >= 0.8) return 'lonely';
+  return 'idle';
+}
+function flashFace(face, ms) { pet.flash = face; pet.flashUntil = performance.now() + ms; }
+function currentFace(t) {
+  if (pet.hold) return pet.hold;
+  if (pet.flash && t < pet.flashUntil) return pet.flash;
+  return baseFace();
+}
+
+function frame(t) {
+  const want = currentFace(t);
+  if (want !== faceSt.face) setFace(faceSt, want);
+  sctx.setTransform(2 * DPR, 0, 0, 2 * DPR, 0, 0);
+  BAJO.draw(sctx, faceSt.p, step(faceSt, t));
+  sctx.setTransform(2 * DPR, 0, 0, 2 * DPR, 0, 0);
+  drawHearts(sctx, petHearts, t, BAJO.c.heart);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+const VIBES = { tap: [25], purr: [40, 80, 40], nudge: [80, 120, 80, 120, 80] };
+function vibe(name) {
+  if (!VIBES[name]) return;
+  const shell = document.getElementById('shell');
+  shell.className = 'shell'; void shell.offsetWidth; shell.classList.add('vibe-' + name);
+  try { navigator.vibrate && navigator.vibrate(VIBES[name]); } catch (e) {}
+}
+
+// 摸头：纯本地反射，不等服务端；次数攒着，下次拉取时一起上报
+screenEl.addEventListener('click', ev => {
+  const r = screenEl.getBoundingClientRect();
+  petHearts.push({ x: (ev.clientX - r.left) / r.width * 320, y: (ev.clientY - r.top) / r.height * 240, t: performance.now() });
+  if (petHearts.length > 12) petHearts.shift();
+  pet.pats++;
+  if (baseFace() === 'sleep') { flashFace('sleepy', 1500); vibe('tap'); }
+  else { flashFace('happy', 1500); vibe('purr'); }
+});
+
+// ================= 团子的声音：大脑在本机合成（Qwen3-TTS），流式推过来，边收边播 =================
+// 协议：say 带 audio=true 和 id → 随后 tts start(id) → 二进制 PCM16 帧 → tts stop(id)。
+const voice = { ctx: null, streams: new Map(), dead: new Set(), open: null, playing: null, sources: [], ready: null };
+
+function audioCtx() {
+  if (!voice.ctx) voice.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  return voice.ctx;
+}
+// 浏览器要求先点一下/按个键才允许出声：第一次交互时顺手解锁
+for (const ev of ['pointerdown', 'keydown']) {
+  addEventListener(ev, () => { const c = audioCtx(); if (c.state !== 'running') c.resume(); }, { capture: true });
+}
+
+function getStream(id) {
+  if (voice.dead.has(id)) return { id, chunks: [], done: true, killed: true, wake: () => {} };  // 已经不要了，后面来的都丢掉
+  if (!voice.streams.has(id)) voice.streams.set(id, { id, rate: 24000, chunks: [], done: false, killed: false, wake: () => {} });
+  return voice.streams.get(id);
+}
+function dropStream(id) {
+  const s = voice.streams.get(id);
+  if (s) { s.killed = true; s.wake(); }
+  voice.streams.delete(id);
+  voice.dead.add(id);
+}
+function onTts(m) {
+  const s = getStream(m.id);
+  if (m.state === 'start') {
+    s.rate = m.rate || 24000;
+    voice.open = s;
+  } else if (m.state === 'stop') {
+    s.done = true; s.error = m.error; s.cancelled = m.cancelled;
+    if (voice.open === s) voice.open = null;
+    s.wake();
+  }
+}
+function onAudio(buf) {
+  const s = voice.open;
+  if (!s || s.killed) return;
+  s.chunks.push(buf);
+  s.lastData = performance.now();
+  s.wake();
+}
+function wait(s, ms) { return new Promise(r => { s.wake = r; setTimeout(r, ms); }); }
+
+// 播放一段流：收到一块排一块，播完返回 'played' / 'cancelled' / 'failed'
+async function playStream(id) {
+  const s = getStream(id);
+  const ctx = audioCtx();
+  if (ctx.state !== 'running') { try { await ctx.resume(); } catch (e) {} }
+  if (ctx.state !== 'running') { dropStream(id); return 'failed'; }  // 还没点过页面，浏览器不让出声
+  voice.playing = s;
+  s.lastData = s.lastData || performance.now();
+  let t = 0, played = 0;
+  while (true) {
+    while (s.chunks.length && !s.killed) {
+      const pcm = new Int16Array(s.chunks.shift());
+      const buf = ctx.createBuffer(1, pcm.length, s.rate);
+      const ch = buf.getChannelData(0);
+      for (let i = 0; i < pcm.length; i++) ch[i] = pcm[i] / 32768;
+      const src = ctx.createBufferSource();
+      src.buffer = buf; src.connect(ctx.destination);
+      t = Math.max(t, ctx.currentTime + (played ? 0.03 : 0.12));  // 第一块多留一点缓冲，免得卡顿
+      src.start(t); t += buf.duration; played++;
+      voice.sources.push(src);
+      src.onended = () => { voice.sources = voice.sources.filter(x => x !== src); };
+    }
+    if (s.done || s.killed || performance.now() - s.lastData > 15000) break;  // 15 秒没新数据就不等了
+    await wait(s, 1000);
+  }
+  const left = t - ctx.currentTime;
+  if (left > 0 && !s.killed) await wait(s, left * 1000 + 50);  // 等最后一块播完
+  const killed = s.killed;
+  dropStream(id);
+  if (voice.playing === s) voice.playing = null;
+  if (killed || s.cancelled) return 'cancelled';
+  return played ? 'played' : 'failed';
+}
+
+// 主人开口、断线时：立刻停下正在说的话
+function stopVoice() {
+  for (const src of voice.sources) { try { src.stop(); } catch (e) {} }
+  voice.sources = [];
+  for (const id of [...voice.streams.keys()]) dropStream(id);
+  voice.open = null;
+}
+
+// 团子的声音服务没开（刚启动还在加载、或者挂了）时只显示文字：不换成电脑自带的语音，团子的声音不能变
+function updateVoiceNote() {
+  document.getElementById('voiceNote').textContent = voice.ready === false ? '（猪咪的声音服务还没好，先只显示文字）' : '';
+}
+
+// 没有团子的声音时：不出声，只按字数停留一会儿，让后面排队的话别挤在一起
+function speak(text) {
+  return new Promise(resolve => setTimeout(resolve, Math.max(2500, text.length * 230)));
+}
+
+// 工具的说明：做完了（回答下面的小字）/ 正在做（等待时的气泡）
+const TOOL_DONE = { web_search: d => `上网查了「${d}」`, ask_cloud: () => '问了云端', weather: d => `看了${d}的天气`,
+                    calculator: d => `算了 ${d}`, date_calc: () => '算了日子' };
+const TOOL_DOING = { web_search: d => `（上网查「${d}」中…）`, ask_cloud: () => '（这个有点难，去问问云端…）',
+                     weather: d => d ? `（看看${d}的天气…）` : '（看看天气…）', calculator: () => '（算一算…）',
+                     date_calc: () => '（翻翻日历…）' };
+function toolNote(u) { const f = TOOL_DONE[u.tool]; return f ? f(u.detail || '') : ''; }
+
+function showBubble(text, opts = {}) {
+  const you = document.getElementById('you');
+  if (opts.you) { you.hidden = false; you.textContent = '你：' + opts.you; } else { you.hidden = true; }
+  document.getElementById('petText').textContent = text;
+  // 这次回答前用过什么工具：哪些东西离开过这台电脑（搜索词、问云端的问题、城市），写出来让主人心里有数
+  const src = document.getElementById('src');
+  const used = (opts.tools || []).map(toolNote).filter(Boolean);
+  if (opts.brain === 'cloud') used.unshift('本地大脑没开，云端代答');
+  src.hidden = !used.length;
+  src.textContent = used.join('；');
+  document.getElementById('bubble').classList.toggle('proactive', !!opts.proactive);
+}
+
+// 播放一条输出：表情 + 震动 + 文字 + 语音，按顺序排队
+async function play(item) {
+  if (item.proactive) {
+    // 主动找你：先震一下、从屏幕下面探头，再开口
+    vibe('nudge');
+    pet.hold = 'peek';
+    await new Promise(r => setTimeout(r, 1600));
+  } else {
+    vibe(item.vibe);
+  }
+  pet.hold = item.face || 'idle';
+  showBubble(item.text, { you: item.you, proactive: item.proactive, tools: item.tools, brain: item.brain });
+  const voiceOn = document.getElementById('voiceOn').checked;
+  if (item.audio && voiceOn) {
+    if (await playStream(item.id) === 'failed') await speak(item.text);  // 没收到声音：只显示文字
+  } else {
+    if (item.audio) dropStream(item.id);
+    await speak(item.text);
+  }
+  if (rec.on) return;  // 说到一半被主人打断：已经换成倾听的表情了，别覆盖
+  pet.hold = null;
+  flashFace(item.face || 'idle', 2000);
+}
+async function drain() {
+  if (pet.busy) return;
+  pet.busy = true;
+  while (outbox.length) await play(outbox.shift());
+  pet.busy = false;
+}
+
+// ================= 和大脑通信：WebSocket，协议见 ai_pet/PROTOCOL.md =================
+// 网页团子和 ESP32 固件说的是同一套协议，所以它也是协议的“参考设备”。
+async function api(path) {
+  const r = await fetch(path);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+let ws = null, wsBackoff = 1000, lastOllama = null, lastSent = null, cloudStandin = false;
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+
+function setOnline(on, ollama) {
+  pet.online = on;
+  const dot = document.getElementById('netDot'), txt = document.getElementById('netText');
+  dot.className = 'dot' + (on ? (ollama === false ? ' warn' : ' on') : '');
+  txt.textContent = !on ? '大脑没连上（它先自己待着）'
+    : ollama === false ? (cloudStandin ? '本地大脑没开，云端代答中' : '大脑在，但 Ollama 没开') : '在你身边';
+}
+
+function send(msg) {
+  if (!ws || ws.readyState !== WebSocket.OPEN) return false;
+  ws.send(JSON.stringify(msg));
+  return true;
+}
+
+function applyState(m) {
+  pet.server = m.state;
+  pet.clockOffset = new Date(m.time.replace(' ', 'T')).getTime() - Date.now();
+}
+
+function flushPats() {
+  if (pet.pats > 0 && send({ type: 'pat', count: pet.pats })) pet.pats = 0;
+}
+
+function onMessage(m) {
+  switch (m.type) {
+    case 'welcome':
+      setOnline(true, lastOllama);
+      applyState(m);
+      flushPats();
+      break;
+    case 'state':
+      applyState(m);
+      break;
+    case 'thinking':
+      pet.hold = 'think';
+      if (m.tool && TOOL_DOING[m.tool]) showBubble(TOOL_DOING[m.tool](m.detail || ''), { you: lastSent });  // 大脑决定先用工具
+      break;
+    case 'say':
+      if (!m.proactive) { pet.hold = null; sendBtn.disabled = false; }
+      outbox.push({ ...m, you: m.proactive ? undefined : lastSent });
+      drain();
+      break;
+    case 'heard':
+      // 大脑听完了：听清了就把原话显示出来，接下来会收到 thinking 和 say
+      if (m.text) {
+        lastSent = m.text;
+        showBubble('……', { you: m.text });
+      } else {
+        pet.hold = null;
+        showBubble(m.error ? `（${m.error}）` : '（没听清，再说一遍？）');
+        flashFace('curious', 2000);
+      }
+      break;
+    case 'tts':
+      onTts(m);
+      break;
+    case 'error':
+      console.warn('brain:', m.message);
+      break;
+  }
+}
+
+function connect() {
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws.binaryType = 'arraybuffer';  // 二进制帧是团子的声音（PCM16）
+  ws.onopen = () => { wsBackoff = 1000; send({ type: 'hello', device: 'web', proto: 1, audio_out: 'pcm16' }); };
+  ws.onmessage = ev => {
+    if (typeof ev.data !== 'string') { onAudio(ev.data); return; }
+    try { onMessage(JSON.parse(ev.data)); } catch (e) { console.warn(e); }
+  };
+  ws.onclose = () => {
+    setOnline(false);
+    stopVoice();
+    if (rec.on) stopTalk(true);
+    if (pet.hold === 'think') { pet.hold = null; showBubble('（没连上大脑）', { you: lastSent }); }
+    sendBtn.disabled = false;
+    setTimeout(connect, wsBackoff);
+    wsBackoff = Math.min(wsBackoff * 2, 15000);
+  };
+}
+
+async function checkHealth() {
+  try {
+    const h = await api('/api/health');
+    lastOllama = h.ollama;
+    cloudStandin = !!h.cloud_standin;
+    voice.ready = h.tts;
+    updateVoiceNote();
+    if (pet.online) setOnline(true, h.ollama);
+    talkBtn.disabled = h.asr === false;
+    if (h.asr === false) talkBtn.textContent = '语音识别还没装好（先打字吧）';
+  } catch (e) {}
+}
+
+// ================= 按住说话：麦克风 → 16kHz PCM → WebSocket 二进制帧 → 大脑本地识别 =================
+// AudioWorklet 在音频线程里把麦克风的 44.1k/48k 降到 16k、转成 16 位整数，每 100ms 发一包。
+const PCM16_WORKLET = `
+class Pcm16 extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this.ratio = sampleRate / 16000; this.pos = 0; this.sum = 0; this.n = 0; this.buf = [];
+    this.port.onmessage = e => { if (e.data === 'flush') { this.emit(); this.port.postMessage('flushed'); } };
+  }
+  emit() {
+    if (!this.buf.length) return;
+    const out = new Int16Array(this.buf.length);
+    for (let i = 0; i < out.length; i++) { const s = Math.max(-1, Math.min(1, this.buf[i])); out[i] = s < 0 ? s * 32768 : s * 32767; }
+    this.port.postMessage(out.buffer, [out.buffer]);
+    this.buf = [];
+  }
+  process(inputs) {
+    const ch = inputs[0] && inputs[0][0];
+    if (!ch) return true;
+    for (let i = 0; i < ch.length; i++) {   // 每 ratio 个输入样本取平均，得到一个 16k 样本
+      this.sum += ch[i]; this.n++; this.pos++;
+      if (this.pos >= this.ratio) { this.pos -= this.ratio; this.buf.push(this.sum / this.n); this.sum = 0; this.n = 0; }
+    }
+    if (this.buf.length >= 1600) this.emit();
+    return true;
+  }
+}
+registerProcessor('pcm16', Pcm16);`;
+
+const talkBtn = document.getElementById('talk');
+const rec = { on: false, ctx: null, stream: null, node: null, startedAt: 0, idleTimer: null, flushed: null };
+
+async function ensureMic() {
+  if (rec.node) return;
+  rec.stream = await navigator.mediaDevices.getUserMedia({
+    audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+  });
+  rec.ctx = new AudioContext();
+  await rec.ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([PCM16_WORKLET], { type: 'application/javascript' })));
+  rec.node = new AudioWorkletNode(rec.ctx, 'pcm16');
+  rec.node.port.onmessage = ev => {
+    if (ev.data === 'flushed') { if (rec.flushed) rec.flushed(); return; }
+    if (rec.on && ws && ws.readyState === WebSocket.OPEN) ws.send(ev.data);
+  };
+  rec.ctx.createMediaStreamSource(rec.stream).connect(rec.node);  // 不接扬声器，只采集
+}
+
+// 说完一分钟没再用就关掉麦克风，浏览器的“正在录音”标记也会消失
+function releaseMicLater() {
+  clearTimeout(rec.idleTimer);
+  rec.idleTimer = setTimeout(() => {
+    if (rec.on) return;
+    if (rec.stream) rec.stream.getTracks().forEach(t => t.stop());
+    if (rec.ctx) rec.ctx.close();
+    rec.ctx = rec.stream = rec.node = null;
+  }, 60000);
+}
+
+async function startTalk() {
+  if (rec.on || talkBtn.disabled) return;
+  if (!pet.online) { showBubble('（没连上大脑，先打字吧）'); return; }
+  rec.on = true;  // 先占住，防止按键连发
+  talkBtn.classList.add('on');
+  try {
+    await ensureMic();
+    await rec.ctx.resume();
+  } catch (e) {
+    rec.on = false;
+    talkBtn.classList.remove('on');
+    showBubble(window.isSecureContext ? '（没拿到麦克风权限）' : '（浏览器只允许在 localhost 或 https 下用麦克风）');
+    return;
+  }
+  if (!rec.on) return;  // 等权限的时候已经松手了
+  stopVoice();  // 主人一开口，团子就闭嘴听（大脑收到 listen start 也会停止推送）
+  rec.startedAt = performance.now();
+  send({ type: 'listen', state: 'start', format: 'pcm16', rate: 16000 });
+  pet.hold = 'listen';
+}
+
+async function stopTalk(cancel = false) {
+  if (!rec.on) return;
+  talkBtn.classList.remove('on');
+  if (rec.node) {
+    // 把最后不到 100ms 的录音也发出去再结束
+    await new Promise(res => { rec.flushed = res; rec.node.port.postMessage('flush'); setTimeout(res, 300); });
+  }
+  rec.on = false;
+  releaseMicLater();
+  const tooShort = performance.now() - rec.startedAt < 300;
+  if (cancel || tooShort || !rec.startedAt) {
+    send({ type: 'listen', state: 'cancel' });
+    pet.hold = null;
+    if (tooShort && !cancel) flashFace('curious', 1200);
+    rec.startedAt = 0;
+    return;
+  }
+  rec.startedAt = 0;
+  send({ type: 'listen', state: 'stop' });
+  pet.hold = 'think';
+  showBubble('……', { you: '（听你说完了）' });
+}
+
+talkBtn.addEventListener('pointerdown', ev => { talkBtn.setPointerCapture(ev.pointerId); startTalk(); });
+talkBtn.addEventListener('pointerup', () => stopTalk());
+talkBtn.addEventListener('pointercancel', () => stopTalk(true));
+talkBtn.addEventListener('contextmenu', ev => ev.preventDefault());  // 手机长按不弹菜单
+window.addEventListener('keydown', ev => {
+  if (ev.code !== 'Space' || ev.repeat || document.activeElement === input) return;
+  ev.preventDefault();
+  startTalk();
+});
+window.addEventListener('keyup', ev => {
+  if (ev.code !== 'Space' || document.activeElement === input) return;
+  ev.preventDefault();
+  stopTalk();
+});
+
+// 摸头：本地先反应（见上面），次数立刻上报；离线时攒着，连上后一起报
+screenEl.addEventListener('click', () => flushPats());
+
+input.addEventListener('input', () => { if (input.value && !pet.hold) flashFace('listen', 3000); });
+document.getElementById('composer').addEventListener('submit', ev => {
+  ev.preventDefault();
+  const text = input.value.trim();
+  if (!text || sendBtn.disabled) return;
+  lastSent = text;
+  if (!send({ type: 'chat', text })) { showBubble('（没连上大脑）', { you: text }); return; }
+  input.value = '';
+  sendBtn.disabled = true;
+  pet.hold = 'think';
+  showBubble('……', { you: text });
+  input.focus();
+});
+
+connect();
+checkHealth();
+setInterval(checkHealth, 30000);
+// 保活：有些网络环境会掐掉长时间没动静的连接
+setInterval(() => send({ type: 'ping' }), 25000);
+</script>
+</body>
+</html>

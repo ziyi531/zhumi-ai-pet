@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>猪咪的记忆</title>
+<style>
+  :root { --bg:#f3efe7; --panel:#fffdf9; --line:#e6dfd3; --fg:#2b2622; --dim:#8a8178; --accent:#e8789a; --soft:#fbe9ef;
+          --ok:#5fa87a; --warn:#d98b3a; --track:#efe9df; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#17181b; --panel:#212328; --line:#34373d; --fg:#ece8e2; --dim:#9a958e; --accent:#f08fae;
+                                      --soft:#3a2a31; --ok:#78c495; --warn:#e8a65e; --track:#2c2e33; }
+  }
+  :root[data-theme="dark"] { --bg:#17181b; --panel:#212328; --line:#34373d; --fg:#ece8e2; --dim:#9a958e; --accent:#f08fae;
+                             --soft:#3a2a31; --ok:#78c495; --warn:#e8a65e; --track:#2c2e33; }
+  * { box-sizing:border-box; }
+  html, body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.55 system-ui, "Microsoft YaHei", sans-serif; }
+  main { max-width:960px; margin:0 auto; padding:24px 16px 56px; }
+  header { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:6px; }
+  header h1 { font-size:20px; margin:0; flex:1; }
+  .sub { color:var(--dim); margin:0 0 18px; font-size:13px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:16px; padding:14px 16px; margin-bottom:14px; }
+  .card h2 { font-size:15px; margin:0 0 4px; }
+  .card .hint { color:var(--dim); font-size:12px; margin:0 0 10px; }
+  button { font:inherit; font-size:13px; padding:6px 12px; border-radius:10px; border:1px solid var(--line);
+           background:var(--panel); color:var(--fg); cursor:pointer; }
+  button.primary { background:var(--accent); border-color:var(--accent); color:#fff; }
+  button.danger { color:#c0475f; }
+  button:disabled { opacity:.5; cursor:default; }
+  .traits { display:grid; gap:10px; }
+  .trait { display:grid; grid-template-columns:64px 1fr 44px; align-items:center; gap:10px; font-size:13px; }
+  .trait input[type=range] { width:100%; accent-color:var(--accent); }
+  .trait .base { color:var(--dim); font-size:11px; grid-column:2; margin-top:-8px; }
+  .traits-text { margin-top:10px; padding:8px 10px; border-radius:10px; background:var(--soft); font-size:13px; }
+  textarea, input[type=text], select { font:inherit; font-size:14px; color:var(--fg); background:var(--panel);
+           border:1px solid var(--line); border-radius:10px; padding:7px 10px; }
+  textarea { width:100%; min-height:68px; resize:vertical; }
+  .row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:8px; }
+  .filters { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin-bottom:10px; }
+  .chip { padding:5px 11px; border-radius:999px; border:1px solid var(--line); background:var(--panel); cursor:pointer; font-size:13px; }
+  .chip.on { background:var(--accent); border-color:var(--accent); color:#fff; }
+  .filters input[type=text] { flex:1; min-width:140px; }
+  .mem { border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-bottom:8px; }
+  .mem.faded { opacity:.6; }
+  .mem .top { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  .tag { font-size:11px; padding:2px 8px; border-radius:999px; background:var(--soft); color:var(--accent); }
+  .tag.dim { background:var(--track); color:var(--dim); }
+  .mem input.text { flex:1; min-width:200px; }
+  .meta { color:var(--dim); font-size:12px; margin-top:6px; display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+  .bar { width:80px; height:6px; border-radius:3px; background:var(--track); overflow:hidden; display:inline-block; vertical-align:middle; }
+  .bar i { display:block; height:100%; background:var(--ok); }
+  .kv { display:flex; gap:10px; align-items:center; padding:6px 0; border-bottom:1px dashed var(--line); font-size:14px; }
+  .kv:last-child { border-bottom:0; }
+  .kv b { min-width:72px; color:var(--dim); font-weight:600; }
+  .kv span { flex:1; }
+  .diary { padding:10px 0; border-bottom:1px dashed var(--line); }
+  .diary:last-child { border-bottom:0; }
+  .diary .day { font-size:12px; color:var(--dim); display:flex; justify-content:space-between; align-items:center; }
+  .empty { color:var(--dim); font-size:13px; padding:8px 0; }
+  .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%); background:var(--fg); color:var(--bg);
+           padding:8px 16px; border-radius:999px; font-size:13px; opacity:0; transition:opacity .2s; pointer-events:none; }
+  .toast.show { opacity:.92; }
+  @media (max-width:560px) { .trait { grid-template-columns:52px 1fr 40px; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>猪咪的记忆</h1>
+    <button id="nightly" title="平时猪咪睡觉时自己会做">现在整理一次</button>
+    <a href="/api/export"><button class="primary">导出备份</button></a>
+  </header>
+  <p class="sub">这些都只存在你的电脑上。删除是真删，不留痕迹；也可以直接对猪咪说“把……忘掉”。<span id="lastNight"></span></p>
+
+  <section class="card">
+    <h2>慢慢长成的性格</h2>
+    <p class="hint">被聊天、摸头、逗它、夸它、跟它说心事一点点推着变，每天每项最多变 0.04。灰字是天生的样子。拖动后点保存可以手动调（调试人设用）。</p>
+    <div class="traits" id="traits"></div>
+    <div class="traits-text" id="traitsText"></div>
+    <div class="row"><button id="saveTraits">保存性格数值</button></div>
+  </section>
+
+  <section class="card">
+    <h2>猪咪对自己的认识</h2>
+    <p class="hint">每晚睡前它自己小小地修订一次，聊天时会带上。</p>
+    <textarea id="selfView" maxlength="120" placeholder="（还没想过，等它第一次整理记忆后会写）"></textarea>
+    <div class="row"><button id="saveSelf">保存</button></div>
+  </section>
+
+  <section class="card">
+    <h2>记得的事 <span class="tag dim" id="memCount"></span></h2>
+    <p class="hint">聊天时会按线索自动想起最相关的几条。“记得多清楚”按遗忘曲线算，太低的会在夜里淡忘（不删，再提起会重新想起来）。</p>
+    <div class="filters" id="filters">
+      <button class="chip on" data-kind="">全部</button>
+      <button class="chip" data-kind="owner">主人的事</button>
+      <button class="chip" data-kind="us">你们之间</button>
+      <button class="chip" data-kind="self">猪咪自己</button>
+      <label style="font-size:13px;color:var(--dim)"><input type="checkbox" id="showFaded"> 显示淡忘的</label>
+      <input type="text" id="search" placeholder="搜索…">
+    </div>
+    <div id="memories"></div>
+  </section>
+
+  <section class="card">
+    <h2>主人画像</h2>
+    <p class="hint">长期不变的信息，聊天时都会带上。</p>
+    <div id="profile"></div>
+  </section>
+
+  <section class="card">
+    <h2>等着回头关心的事</h2>
+    <div id="followups"></div>
+  </section>
+
+  <section class="card">
+    <h2>猪咪的日记</h2>
+    <p class="hint">它自己写的，只是它的感受，不当作事实来源。</p>
+    <div id="diary"></div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const KIND = { owner: '主人的事', us: '你们之间', self: '猪咪自己' };
+const TRAIT = { intimacy: '亲密', trust: '信任', clingy: '黏人', tsundere: '傲娇', playful: '活泼' };
+let data = null, kindFilter = '';
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h);
+  t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+async function api(method, url, body) {
+  const r = await fetch(url, { method, headers: body ? { 'Content-Type': 'application/json' } : {},
+                               body: body ? JSON.stringify(body) : undefined });
+  if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText);
+  return r.json();
+}
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function day(ts) { return (ts || '').slice(0, 16); }
+
+function renderTraits() {
+  const box = $('traits'); box.innerHTML = '';
+  for (const [k, name] of Object.entries(TRAIT)) {
+    const v = data.traits[k], b = data.traits_baseline[k];
+    const row = el('div', 'trait');
+    row.append(el('span', '', name));
+    const r = document.createElement('input'); r.type = 'range'; r.min = 0; r.max = 1; r.step = 0.01; r.value = v; r.dataset.k = k;
+    const num = el('span', '', v.toFixed(2));
+    r.oninput = () => { num.textContent = (+r.value).toFixed(2); };
+    row.append(r, num, el('span', 'base', `天生 ${b.toFixed(2)}`));
+    box.append(row);
+  }
+  $('traitsText').textContent = data.traits_text || '';
+}
+
+function renderMemories() {
+  const box = $('memories'); box.innerHTML = '';
+  const q = $('search').value.trim(), faded = $('showFaded').checked;
+  const list = data.memories.filter(m => (!kindFilter || m.kind === kindFilter) && (faded || m.status === 'active')
+                                         && (!q || m.text.includes(q)));
+  $('memCount').textContent = `${data.memories.filter(m => m.status === 'active').length} 条`;
+  if (!list.length) { box.append(el('div', 'empty', '还没有记得的事（多跟猪咪聊聊）')); return; }
+  for (const m of list) {
+    const card = el('div', 'mem' + (m.status === 'faded' ? ' faded' : ''));
+    const top = el('div', 'top');
+    const kind = document.createElement('select');
+    for (const [k, n] of Object.entries(KIND)) { const o = el('option', '', n); o.value = k; o.selected = k === m.kind; kind.append(o); }
+    const text = document.createElement('input'); text.type = 'text'; text.className = 'text'; text.value = m.text; text.maxLength = 80;
+    const imp = document.createElement('select'); imp.title = '重要度';
+    for (let i = 1; i <= 5; i++) { const o = el('option', '', '重要度 ' + i); o.value = i; o.selected = i === m.importance; imp.append(o); }
+    const save = el('button', '', '保存'), del = el('button', 'danger', '删除');
+    save.onclick = async () => {
+      try { await api('PATCH', `/api/memories/${m.id}`, { text: text.value, kind: kind.value, importance: +imp.value });
+            toast('改好了'); load(); } catch (e) { toast('没改成：' + e.message); }
+    };
+    del.onclick = async () => {
+      if (!confirm(`真的删掉这条记忆吗？\n\n${m.text}`)) return;
+      try { await api('DELETE', `/api/memories/${m.id}`); toast('删掉了'); load(); } catch (e) { toast('没删成：' + e.message); }
+    };
+    top.append(kind, text, imp, save, del);
+    const meta = el('div', 'meta');
+    const bar = el('span', 'bar'); const fill = el('i'); fill.style.width = Math.round(m.retention * 100) + '%'; bar.append(fill);
+    const keep = el('span'); keep.append('记得多清楚 ', bar, ` ${Math.round(m.retention * 100)}%`);
+    meta.append(keep, el('span', '', `记于 ${day(m.created_at)}`), el('span', '', `提起 ${m.mentions} 次`),
+                el('span', '', m.recalled_at ? `想起过 ${m.recall_count} 次，最近 ${day(m.recalled_at)}` : '还没被想起过'));
+    if (m.status === 'faded') meta.append(el('span', 'tag dim', '已淡忘'));
+    card.append(top, meta);
+    box.append(card);
+  }
+}
+
+function renderList(boxId, items, render, empty) {
+  const box = $(boxId); box.innerHTML = '';
+  if (!items.length) { box.append(el('div', 'empty', empty)); return; }
+  items.forEach(it => box.append(render(it)));
+}
+
+function render() {
+  $('lastNight').textContent = data.last_night ? ` 上次整理：${data.last_night} 晚上。` : ' 还没整理过。';
+  renderTraits();
+  $('selfView').value = data.self_view || '';
+  renderMemories();
+  renderList('profile', data.profile, p => {
+    const r = el('div', 'kv'); r.append(el('b', '', p.key), el('span', '', p.value));
+    const d = el('button', 'danger', '删除');
+    d.onclick = async () => { if (!confirm(`删掉「${p.key}：${p.value}」？`)) return;
+      await api('DELETE', `/api/profile/${encodeURIComponent(p.key)}`); toast('删掉了'); load(); };
+    r.append(d); return r;
+  }, '还不了解主人');
+  renderList('followups', data.followups, f => {
+    const r = el('div', 'kv'); r.append(el('b', '', day(f.due_at)), el('span', '', f.fact + (f.hint ? `（${f.hint}）` : '')));
+    const d = el('button', 'danger', '取消');
+    d.onclick = async () => { await api('DELETE', `/api/followups/${f.id}`); toast('取消了'); load(); };
+    r.append(d); return r;
+  }, '没有要回头关心的事');
+  renderList('diary', data.diary, d => {
+    const r = el('div', 'diary');
+    const head = el('div', 'day'); head.append(el('span', '', d.day));
+    const x = el('button', 'danger', '删除');
+    x.onclick = async () => { if (!confirm(`删掉 ${d.day} 的日记？`)) return;
+      await api('DELETE', `/api/diary/${d.day}`); toast('删掉了'); load(); };
+    head.append(x); r.append(head, el('div', '', d.text)); return r;
+  }, '还没写过日记（猪咪睡觉时会写）');
+}
+
+async function load() {
+  try { data = await api('GET', '/api/memories'); render(); }
+  catch (e) { $('memories').textContent = '读不到记忆：' + e.message; }
+}
+
+$('filters').addEventListener('click', e => {
+  const b = e.target.closest('.chip'); if (!b) return;
+  document.querySelectorAll('#filters .chip').forEach(c => c.classList.toggle('on', c === b));
+  kindFilter = b.dataset.kind; renderMemories();
+});
+$('search').oninput = renderMemories;
+$('showFaded').onchange = renderMemories;
+$('saveSelf').onclick = async () => { await api('PUT', '/api/self_view', { text: $('selfView').value }); toast('存好了'); load(); };
+$('saveTraits').onclick = async () => {
+  const values = {}; document.querySelectorAll('#traits input[type=range]').forEach(r => values[r.dataset.k] = +r.value);
+  await api('PUT', '/api/traits', { values }); toast('性格数值改好了'); load();
+};
+$('nightly').onclick = async () => {
+  const b = $('nightly'); b.disabled = true; b.textContent = '整理中…（要十几秒）';
+  try { const r = await api('POST', '/api/nightly');
+        toast(`整理完了：合并 ${r.merged.length} 组，淡忘 ${r.faded.length} 条` + (r.diary ? '，写了日记' : '')); load(); }
+  catch (e) { toast('整理失败：' + e.message); }
+  b.disabled = false; b.textContent = '现在整理一次';
+};
+load();
+</script>
+</body>
+</html>
